@@ -1,20 +1,18 @@
 
-# A very simple Flask Hello World app for you to get started with...
-
-from flask import Flask,  request, redirect
+from flask import Flask,  request, redirect, render_template
 from urllib.parse import urlparse, urlunparse
 
 
 app = Flask(__name__)
 
 
-FROM_DOMAIN = "statki.pythonanywhere.com"
-TO_DOMAIN = "149.156.43.57/p23"
+# FROM_DOMAIN = "statki.pythonanywhere.com"
+# TO_DOMAIN = "149.156.43.57/p23"
 
 
 @app.route('/')
 def hello_world():
-    return 'Welcome to statki'
+    return render_template('start.html')
 
 @app.route('/rooms')
 def hello_world_rooms():
