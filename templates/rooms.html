@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <link rel="stylesheet" href="../static/styles/style.css">
+    <style>
+table, th, td {
+  border:1px solid black;
+}
+</style>
+</head>
+
+<body>
+    <section>
+    {% block content %}
+        {% if users %}
+        <table>
+        <tr><th>Dostępni gracze</th></tr>
+        {% for avail in available %}<tr><td>{{ avail[1] }}</td></tr>{% endfor %}
+        </table>
+
+        <table>
+        <tr><th>Zajęci gracze</th></tr>
+        {% for in_g in in_game %}<tr><td>{{ in_g[1] }}</td></tr>{% endfor %}
+        </table>
+
+        <table>
+        <tr><th>Wszyscy gracze</th></tr>
+        {% for user in users %}<tr><td>{{ user[1] }}</td></tr>{% endfor %}
+        </table>
+        {% else %}
+        <h1>{% block title2 %} Brak graczy {% endblock %}</h1>
+        {% endif %}
+    {% endblock %}
+    </section>
+
+</body>
+
+</html>
