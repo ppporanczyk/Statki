@@ -1,43 +1,13 @@
-<!DOCTYPE html>
-<html lang="pl">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test</title>
-    <link rel="stylesheet" href="../static/styles/style.css">
-</head>
+{% block content %}
+<div class="main-text">
+    <h1 class="main-title">
+        Żeby móc zagrać w grę musisz się zalogować!!!
+    </h1>
+    <h2 class="main - subtitle">
+        Jeśli nie masz konta zarejestruj się!!!
+    </h2>
+</div>
 
-<body>
-    <section>
-        <form class="ui form">
-            <div class="field">
-                <label id="username" for="username"></label>
-                <input class="input_text" type="text" placeholder="Nazwa użytkownika" required>
-            </div>
-
-            <div class="field">
-                <label for="password"></label>
-                <input class="input_text" type="password" placeholder="Hasło" required>
-            </div>
-
-            <div class="field">
-                <div class="ui checkbox">
-                    <input class="remember" type="checkbox">
-                    <label>Zapamiętaj mnie</label>
-                </div>
-            </div>
-
-
-            <button type="submit" class="button">Zaloguj się</button>
-
-            <a href="statki.pythonanywhere.com/rooms">
-                <button class="register">Zarejestruj sie</button>
-            </a>
-        </form>
-    </section>
-
-</body>
-
-</html>
+{% endblock %}

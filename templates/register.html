@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<section class="sectionForm">
+    <h2 class="text-top-form">REJESTRACJA</h2>
+    <form class="ui form">
+        <div class="field">
+            <label id="email" for="username"></label>
+            <input class="input_text" type="email" name="email" placeholder="Email" required>
+        </div>
+        <div class="field">
+            <label id="username" for="username"></label>
+            <input class="input_text" type="text" name="username" placeholder="Nazwa użytkownika" required>
+        </div>
+
+        <div class="field">
+            <label for="password"></label>
+            <input class="input_text" type="password" name="password" placeholder="Hasło" required>
+        </div>
+
+        <div class="field">
+            <label for="password"></label>
+            <input class="input_text" type="password" name="password" placeholder="Potwierdź hasło" required>
+        </div>
+
+        <button type="submit" class="button_register">Zarejestruj się</button>
+    </form>
+
+</section>
+
+{% endblock %}
