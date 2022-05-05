@@ -79,11 +79,10 @@ form {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 35vw;
+    width: 30rem;
     background-color: #ecf0f1;
-    padding: 0.2rem;
+    padding: 0.5rem;
     border-radius: 20px;
-    height: 35vh;
 }
 
 .input_text {
