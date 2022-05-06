@@ -1,0 +1,1 @@
+# ciało klasy przeniesione do flask_app

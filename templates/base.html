@@ -14,26 +14,25 @@
 <body>
     <header>
 
-        <div class="brand"><a href="#">Statki</a></div>
+        <div class="brand">
+            <a href="{{ url_for('main_page') }}">Statki</a>
+        </div>
+
 
         <nav class="navbar">
             <ul>
-                <li><a href="{{ url_for('main_page') }}" class="navbar-item">
-                        Strona główna
-                    </a></li>
+                {% if current_user.is_anonymous %}
                 <li><a href="{{ url_for('login') }}" class="navbar-item">
                         Logowanie
                     </a></li>
-                <li> <a href="{{ url_for('register') }}" class="navbar-item">
-                        Rejestracja
-                    </a>
-                </li>
+                <li><a href="{{ url_for('register') }}">Rejestracja</a></li>
+                {% else %}
                 <li> <a href="{{ url_for('logout') }}" class="navbar-item">
                         Wyloguj się
                     </a>
                 </li>
 
-
+            {% endif %}
             </ul>
         </nav>
     </header>
