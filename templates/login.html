@@ -12,7 +12,7 @@
     </div>
     {% endif %}
     {% endwith %}
-    <form class="ui form" method="POST" action="/login">
+    <!--form class="ui form" method="POST" action="{{ url_for('login') }}">
         <div class="field">
             <label id="username" for="username"></label>
             <input class="input_text" type="text" name="username" placeholder="Nazwa użytkownika" required>
@@ -38,8 +38,48 @@
         </a></li>
 
 
-    </form>
-
+    </form-->
+<form action="" method="post">
+   {{ form.hidden_tag() }}
+   <div>
+      {{ form.email(placeholder="email",
+      style='
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+      {% for error in form.email.errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+   </div>
+   <br>
+   <div>
+      {{ form.password(placeholder="password",
+      style='
+      font-weight: bold;
+      padding: 12px 20px ;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box') }}
+      {% for error in form.password.errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+   </div>
+   <p>{{ form.remember() }} {{ form.remember.label }}</p>
+   <p>{{ form.submit(style ='background-color: #4CAF50;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 4px') }}
+   </p>
+</form>
+   {% for message in get_flashed_messages() %}
+<p style="color: red;">Error : {{ message }}</p>
+{% endfor %}
 </section>
 
 {% endblock %}

@@ -2,12 +2,19 @@
 
 {% block content %}
 <div class="main-text">
-    <h1 class="main-title">
-        Żeby móc zagrać w grę musisz się zalogować!!!
-    </h1>
-    <h2 class="main - subtitle">
-        Jeśli nie masz konta zarejestruj się!!!
-    </h2>
+    {% if current_user.is_anonymous %}
+
+        <h1 class="main-title">
+            Żeby móc zagrać w grę musisz się zalogować!!!
+        </h1>
+        <h2 class="main - subtitle">
+            Jeśli nie masz konta zarejestruj się!!!
+        </h2>
+    {% else %}
+        <h1 class="main-title">
+            Czas na abordaż!
+        </h1>
+    {% endif %}
 </div>
 
 {% endblock %}
