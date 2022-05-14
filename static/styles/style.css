@@ -12,6 +12,10 @@ body {
     box-sizing: border-box;
 }
 
+.mainBody {
+    margin-top: 1rem;
+}
+
 header {
     display: flex;
     align-items: center;
@@ -49,7 +53,7 @@ li {
     margin-left: 1rem;
     height: 100%;
     padding: 0.5rem;
-
+    cursor: pointer;
 }
 
 li>a {
@@ -70,7 +74,7 @@ li:hover {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 50vh;
+    /* height: 50vh; */
     padding: 10px;
 }
 
@@ -83,6 +87,15 @@ form {
     background-color: #ecf0f1;
     padding: 0.5rem;
     border-radius: 20px;
+}
+
+.register_input {
+    font-weight: bold;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
 .input_text {
@@ -98,26 +111,54 @@ form {
     text-decoration: none;
 }
 
+.notification {
+    color: red;
+    padding: 0.5rem;
+}
+
+.do_you_have_account:visited {
+    color: blue;
+}
+
+.do_you_have_account {
+    text-align: center;
+    text-decoration: none;
+}
+
+.do_you_have_account:hover {
+    text-decoration: underline;
+    transition: .5s;
+}
+
+.error_info {
+    text-align: center;
+    color: red;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.3rem;
+}
+
 .checkbox {
     display: inline-block;
     margin: 15px;
 }
 
 .text-top-form {
-    margin: 1rem;
+    margin: 1.5rem;
 }
 
 
 .button {
-    background-color: rgb(33, 167, 207);
+    background-color: rgb(17, 192, 70);
     text-align: center;
     border-radius: 20px;
     border-style: none;
     padding: 10px;
-    width: 33%;
+    width: 100%;
     text-transform: uppercase;
     margin-top: 1rem;
 }
+
 
 .button:hover {
     background-color: rgb(7, 139, 179);
@@ -147,9 +188,13 @@ form {
     text-align: center;
     border-style: none;
     text-decoration: none;
-    padding: 0.5rem;
+    padding-top: 0.5rem;
     font-size: 0.8rem;
     color: rgb(236, 117, 78);
+}
+
+.forget:hover {
+    color: rgb(146, 46, 12);
 }
 
 @media(max-width: 692px) {
@@ -164,6 +209,15 @@ form {
     }
 }
 
+.main-title {
+    text-align: center;
+}
+
+.main-subtitle {
+    text-align: center;
+    padding: 10px;
+    font-size: 1.2rem;
+}
 
 .main-text {
     display: flex;

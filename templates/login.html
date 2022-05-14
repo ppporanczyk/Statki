@@ -2,84 +2,38 @@
 
 {% block content %}
 
-
 <section class="sectionForm">
     <h2 class="text-top-form">LOGOWANIE</h2>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
-    <div class="notification ">
+    <div class="notification">
         {{ messages[0] }}
     </div>
     {% endif %}
     {% endwith %}
-    <!--form class="ui form" method="POST" action="{{ url_for('login') }}">
-        <div class="field">
-            <label id="username" for="username"></label>
-            <input class="input_text" type="text" name="username" placeholder="Nazwa użytkownika" required>
+
+    <form action="{{ url_for('login') }}" method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {% for error in form.email.errors %}
+            <p class="error_info">{{ error }}</p>
+            {% endfor %}
+
+            {{ form.email(placeholder="email",class_="input_text") }}
         </div>
-
-        <div class="field">
-            <label for="password"></label>
-            <input class="input_text" type="password" name="password" placeholder="Hasło" required>
+        <div>
+            {% for error in form.password.errors %}
+            <p class="error_info">{{ error }}</p>
+            {% endfor %}
+            {{ form.password(placeholder="hasło",class_="input_text") }}
         </div>
-
-        <div class="field">
-            <div class="ui checkbox">
-                <input class="remember" type="checkbox" name="remember">
-                <label>Zapamiętaj mnie</label>
-            </div>
-        </div>
-
-
-        <button type="submit" class="button">Zaloguj się</button>
-
+        <p>{{ form.remember() }} {{ form.remember.label }}</p>
         <a href="{{ url_for('forget_password') }}" class="navbar-item forget">
             Zapomniałem hasła
-        </a></li>
-
-
-    </form-->
-<form action="" method="post">
-   {{ form.hidden_tag() }}
-   <div>
-      {{ form.email(placeholder="email",
-      style='
-      font-weight: bold;
-      padding: 12px 20px ;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box') }}
-      {% for error in form.email.errors %}
-      <p>{{ error }}</p>
-      {% endfor %}
-   </div>
-   <br>
-   <div>
-      {{ form.password(placeholder="password",
-      style='
-      font-weight: bold;
-      padding: 12px 20px ;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box') }}
-      {% for error in form.password.errors %}
-      <p>{{ error }}</p>
-      {% endfor %}
-   </div>
-   <p>{{ form.remember() }} {{ form.remember.label }}</p>
-   <p>{{ form.submit(style ='background-color: #4CAF50;
-      color: white;
-      padding: 14px 20px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 4px') }}
-   </p>
-</form>
-   {% for message in get_flashed_messages() %}
-<p style="color: red;">Error : {{ message }}</p>
-{% endfor %}
+        </a>
+        <p>{{ form.submit(class_="button") }}
+        </p>
+    </form>
 </section>
 
 {% endblock %}

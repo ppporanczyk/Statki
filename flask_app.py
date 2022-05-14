@@ -1,25 +1,54 @@
 import os
-
+import random
+import string
 from flask import *
 from flask import render_template, request
+from forms import LoginForm, RegistrationForm, ResetPasswordForm
+from flask_mail import Mail, Message
+
 from flask_login import LoginManager
+from flask_login import UserMixin
 from flask_login import login_required, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
-from forms import LoginForm, RegistrationForm
+from werkzeug.security import generate_password_hash, check_password_hash
 
 SECRET_KEY = os.urandom(32)
 # FROM_DOMAIN = "statki.pythonanywhere.com"
 # TO_DOMAIN = "149.156.43.57/p23"
 
 app = Flask(__name__)
+
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 
+# do wysyłania maili
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = "shipgamesender@gmail.com"
+app.config['MAIL_PASSWORD'] = "okretyOkrety2"
+mail = Mail(app)
+
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+def password_generator(len_of_password):
+    length = len_of_password
+
+    lower = string.ascii_lowercase
+    upper = string.ascii_uppercase
+    num = string.digits
+
+    all = lower+upper+num
+
+    temp = random.sample(all, length)
+    password = "".join(temp)
+
+    return password
 
 
 def get_gamers(status=None):
@@ -64,9 +93,30 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/forget')
+@app.route('/forget', methods=['GET', 'POST'])
 def forget_password():
-    return render_template('forget_password.html')
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+
+        user = Users.query.filter_by(email=form.email.data).first()
+        new_password = password_generator(10)
+        if user is not None:
+            # tu wysyłamy maila
+            msg = Message()
+            msg.subject = "Reset Password mail"
+            msg.recipients = [form.email.data]
+            msg.sender = 'shipgamesender@gmail.com'
+            msg.body = f"Twoje nowe hasło to: {new_password}"
+            mail.send(msg)
+
+            # tu zmieniamy hasło w bazie
+            user = Users.query.filter_by(email=form.email.data).first()
+            user.password = new_password
+            db.session.commit()
+            flash(f"Wysłano mail na adres: {form.email.data}")
+            return redirect(url_for('login'))
+        flash('Użytkownik o takiem adresie mail już istnieje')
+    return render_template('forget_password.html', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -74,11 +124,14 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         if form.validate_on_submit():
-            user = Users(name=form.name.data, email=form.email.data)
-            user.set_password(form.password1.data)
-            db.session.add(user)
-            db.session.commit()
-            return redirect(url_for('login'))
+            user = Users.query.filter_by(email=form.email.data).first()
+            if user is None:
+                user = Users(name=form.name.data, email=form.email.data)
+                user.set_password(form.password1.data)
+                db.session.add(user)
+                db.session.commit()
+                return redirect(url_for('login'))
+            flash('Użytkownik o takiem adresie mail już istnieje')
     return render_template('register.html', form=form)
 
 
@@ -95,9 +148,6 @@ def logout():
 #         urlparts_list = list(urlparts)
 #         urlparts_list[1] = TO_DOMAIN
 #     return redirect(urlunparse(urlparts_list), code=301)
-
-from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Users(UserMixin, db.Model):
@@ -117,4 +167,4 @@ class Users(UserMixin, db.Model):
 
 if __name__ == "__main__":
     app.debug = True
-app.run()
+    app.run()
