@@ -44,7 +44,6 @@ def password_generator(len_of_password):
     num = string.digits
 
     all = lower+upper+num
-
     temp = random.sample(all, length)
     password = "".join(temp)
 
@@ -111,11 +110,12 @@ def forget_password():
 
             # tu zmieniamy hasło w bazie
             user = Users.query.filter_by(email=form.email.data).first()
-            user.password = new_password
+            # user.password = new_password
+            user.set_password(new_password)
             db.session.commit()
             flash(f"Wysłano mail na adres: {form.email.data}")
             return redirect(url_for('login'))
-        flash('Użytkownik o takiem adresie mail już istnieje')
+        flash('Użytkownik o takiem adresie mail nie istnieje')
     return render_template('forget_password.html', form=form)
 
 
