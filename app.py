@@ -13,7 +13,7 @@ SECRET_KEY = os.urandom(32)
 
 app = Flask(__name__)
 app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgres://plkpwizjpefcnn:b906d13f6d9fb7ab33551e98f382c97272dc2e3516ef50e420b10eec473ccdef@ec2-99-80-170-190.eu-west-1.compute.amazonaws.com:5432/d1ve7vekfo7818'
+    'SQLALCHEMY_DATABASE_URI'] = 'postgres://iytcxqleuicnzc:21a0b05a66bcc5338ad41acccd5c050dedb2d19f065269164cbfe8d6791f014a@ec2-52-18-116-67.eu-west-1.compute.amazonaws.com:5432/d8ab37sje5b6up'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 
