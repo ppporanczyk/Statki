@@ -27,11 +27,14 @@
                     </a></li>
                 <li><a href="{{ url_for('register') }}">Rejestracja</a></li>
                 {% else %}
+                <li> <a href="{{ url_for('profile') }}" class="navbar-item">
+                        Wyświetl profil
+                    </a>
+                </li>
                 <li> <a href="{{ url_for('logout') }}" class="navbar-item">
                         Wyloguj się
                     </a>
                 </li>
-
             {% endif %}
             </ul>
         </nav>
