@@ -6,24 +6,46 @@ from flask_login import LoginManager
 from flask_login import login_required, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from forms import LoginForm, RegistrationForm
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 SECRET_KEY = os.urandom(32)
 # FROM_DOMAIN = "statki.pythonanywhere.com"
 # TO_DOMAIN = "149.156.43.57/p23"
 
 app = Flask(__name__)
+#should be updated to working db URI to run on heroku
 app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgres://iytcxqleuicnzc:21a0b05a66bcc5338ad41acccd5c050dedb2d19f065269164cbfe8d6791f014a@ec2-52-18-116-67.eu-west-1.compute.amazonaws.com:5432/d8ab37sje5b6up'
+    'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:postgres@localhost:5432/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 
 db = SQLAlchemy(app)
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), index=True, unique=True)
+    email = db.Column(db.String(150), unique=True, index=True)
+    password = db.Column(db.String(150))
+    status = db.Column(db.String(150))
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+
+
+db.create_all()
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 
 def get_gamers(status=None):
-    gamers = Users.query.filter_by(status=status).all()
+    gamers = User.query.filter_by(status=status).all()
     return gamers
 
 
@@ -34,7 +56,7 @@ def main_page():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Users.query.get(user_id)
+    return User.query.get(user_id)
 
 
 @app.route('/profile')
@@ -55,7 +77,7 @@ def show_rooms():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = Users.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.check_password(form.password.data):
             login_user(user)
             next = request.args.get("next")
@@ -74,7 +96,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         if form.validate_on_submit():
-            user = Users(name=form.name.data, email=form.email.data)
+            user = User(name=form.name.data, email=form.email.data)
             user.set_password(form.password1.data)
             db.session.add(user)
             db.session.commit()
@@ -96,23 +118,8 @@ def logout():
 #         urlparts_list[1] = TO_DOMAIN
 #     return redirect(urlunparse(urlparts_list), code=301)
 
-from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
 
 
-class Users(UserMixin, db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), index=True, unique=True)
-    email = db.Column(db.String(150), unique=True, index=True)
-    password = db.Column(db.String(150))
-    status = db.Column(db.String(150))
-
-    def set_password(self, password):
-        self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
 
 
 if __name__ == "__main__":
