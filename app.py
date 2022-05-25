@@ -8,6 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 from forms import LoginForm, RegistrationForm
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from enum import Enum
+
 
 SECRET_KEY = os.urandom(32)
 # FROM_DOMAIN = "statki.pythonanywhere.com"
@@ -22,7 +24,7 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 db = SQLAlchemy(app)
 
-class User(UserMixin, db.Model):
+class Users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), index=True, unique=True)
     email = db.Column(db.String(150), unique=True, index=True)
@@ -39,13 +41,33 @@ class User(UserMixin, db.Model):
         return '<User %r>' % self.username
 
 
+class GameResult(Enum):
+    WON = 1
+    LOST = 2
+    NOT_CONCLUDED = 3
+
+class GameState(Enum):
+    IN_PROGRESS = 1
+    ENDED = 2
+    IN_PREPARATION = 3
+
+class Games(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    state = db.Column(db.String(50), unique=False)
+
+class PlayersGames(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer)
+    player_id = db.Column(db.Integer)
+    result = db.Column(db.String(50))
+
 db.create_all()
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 
 def get_gamers(status=None):
-    gamers = User.query.filter_by(status=status).all()
+    gamers = Users.query.filter_by(status=status).all()
     return gamers
 
 
@@ -56,12 +78,25 @@ def main_page():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    return Users.query.get(user_id)
+
+
+def get_games_won_for_player():
+    pass
+
+def get_games_lost_for_player():
+    pass
+
+def get_games_in_progress_for_player():
+    pass
 
 
 @app.route('/profile')
 def profile():
-    return render_template('profile.html')
+    return render_template('profile.html',
+                           games_in_progress=get_games_in_progress_for_player(),
+                           games_won=get_games_won_for_player(),
+                           games_lost=get_games_lost_for_player())
 
 
 @login_required
@@ -77,7 +112,7 @@ def show_rooms():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = Users.query.filter_by(email=form.email.data).first()
         if user is not None and user.check_password(form.password.data):
             login_user(user)
             next = request.args.get("next")
@@ -96,7 +131,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         if form.validate_on_submit():
-            user = User(name=form.name.data, email=form.email.data)
+            user = Users(name=form.name.data, email=form.email.data)
             user.set_password(form.password1.data)
             db.session.add(user)
             db.session.commit()
@@ -106,6 +141,7 @@ def register():
 
 @app.route("/logout")
 def logout():
+    print(current_user)
     logout_user()
     return redirect(url_for('login'))
 
