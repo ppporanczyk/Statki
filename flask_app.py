@@ -6,11 +6,10 @@ from flask import render_template, request
 from forms import LoginForm, RegistrationForm, ResetPasswordForm
 from flask_mail import Mail, Message
 
-from flask_login import LoginManager
-from flask_login import UserMixin
-from flask_login import login_required, login_user, logout_user
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from pusher import pusher
 
 SECRET_KEY = os.urandom(32)
 # FROM_DOMAIN = "statki.pythonanywhere.com"
@@ -35,6 +34,15 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+pusher = pusher_client = pusher.Pusher(
+    app_id='1410664',
+    key='4d2726b6eaed69e2834f',
+    secret='3ca2a9d952ba6921320b',
+    cluster='eu',
+    ssl=True
+)
+name = ''
+
 
 def password_generator(len_of_password):
     length = len_of_password
@@ -43,7 +51,7 @@ def password_generator(len_of_password):
     upper = string.ascii_uppercase
     num = string.digits
 
-    all = lower+upper+num
+    all = lower + upper + num
     temp = random.sample(all, length)
     password = "".join(temp)
 
@@ -58,6 +66,27 @@ def get_gamers(status=None):
 @app.route('/')
 def main_page():
     return render_template('index.html')
+
+
+@login_required
+@app.route('/play')
+def play():
+    return render_template('play.html', name=current_user.name)
+
+
+@app.route("/pusher/auth", methods=['POST'])
+def pusher_authentication():
+    auth = pusher.authenticate(
+        channel=request.form['channel_name'],
+        socket_id=request.form['socket_id'],
+        custom_data={
+            u'user_id': name,
+            u'user_info': {
+                u'role': u'player'
+            }
+        }
+    )
+    return json.dumps(auth)
 
 
 @login_manager.user_loader
@@ -87,7 +116,7 @@ def login():
         if user is not None and user.check_password(form.password.data):
             login_user(user)
             next = request.args.get("next")
-            return redirect(next or url_for('show_rooms'))
+            return redirect(next or url_for('play'))
         flash('Nieprawidłowy adres e-mail lub hasło.')
     return render_template('login.html', form=form)
 
