@@ -6,12 +6,13 @@ from flask import render_template, request
 from forms import LoginForm, RegistrationForm, ResetPasswordForm
 from flask_mail import Mail, Message
 
-from flask_login import LoginManager
-from flask_login import UserMixin
-from flask_login import login_required, login_user, logout_user
+
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from pusher import pusher
 from enum import Enum
+
 
 
 SECRET_KEY = os.urandom(32)
@@ -19,9 +20,23 @@ SECRET_KEY = os.urandom(32)
 # TO_DOMAIN = "149.156.43.57/p23"
 
 app = Flask(__name__)
+
+
+pusher = pusher_client = pusher.Pusher(
+    app_id='1410664',
+    key='4d2726b6eaed69e2834f',
+    secret='3ca2a9d952ba6921320b',
+    cluster='eu',
+    ssl=True
+)
+name = ''
+# app.config[
+#     'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
+
 #should be updated to working db URI to run on heroku
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:postgres@localhost:5432/postgres'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 
@@ -34,6 +49,7 @@ app.config['MAIL_PASSWORD'] = "okretyOkrety2"
 mail = Mail(app)
 
 db = SQLAlchemy(app)
+
 
 class Users(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -49,13 +65,16 @@ class Users(UserMixin, db.Model):
         return check_password_hash(self.password, password)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.name
+
+
 
 
 class GameResult(Enum):
     WON = 1
     LOST = 2
     NOT_CONCLUDED = 3
+
 
 class GameState(Enum):
     IN_PROGRESS = 1
@@ -84,7 +103,8 @@ def password_generator(len_of_password):
     upper = string.ascii_uppercase
     num = string.digits
 
-    all = lower+upper+num
+    all = lower + upper + num
+
     temp = random.sample(all, length)
     password = "".join(temp)
 
@@ -101,6 +121,28 @@ def main_page():
     return render_template('index.html')
 
 
+@login_required
+@app.route('/play')
+def play():
+    global name
+    name = request.args.get('name')
+    return render_template('play.html', name=current_user.name)
+
+
+@app.route("/pusher/auth", methods=['POST'])
+def pusher_authentication():
+    auth = pusher.authenticate(
+        channel=request.form['channel_name'],
+        socket_id=request.form['socket_id'],
+        custom_data={
+            u'user_id': current_user.name,
+            u'user_info': {
+                u'role': u'player'
+            }
+        }
+    )
+    return json.dumps(auth)
+
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(user_id)
@@ -109,13 +151,17 @@ def load_user(user_id):
 def get_games_won_for_player():
     pass
 
+
 def get_games_lost_for_player():
     pass
+
 
 def get_games_in_progress_for_player():
     pass
 
 
+
+@login_required
 @app.route('/profile')
 def profile():
     return render_template('profile.html',
@@ -141,7 +187,8 @@ def login():
         if user is not None and user.check_password(form.password.data):
             login_user(user)
             next = request.args.get("next")
-            return redirect(next or url_for('show_rooms'))
+            return redirect(next or url_for('play'))
+
         flash('Nieprawidłowy adres e-mail lub hasło.')
     return render_template('login.html', form=form)
 
@@ -205,8 +252,9 @@ def logout():
 
 
 
-
-
 if __name__ == "__main__":
     app.debug = True
     app.run()
+
+name = ''
+
