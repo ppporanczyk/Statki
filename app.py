@@ -6,18 +6,22 @@ from flask import render_template, request
 from forms import LoginForm, RegistrationForm, ResetPasswordForm
 from flask_mail import Mail, Message
 
+
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from pusher import pusher
 from enum import Enum
 
+
+
 SECRET_KEY = os.urandom(32)
 # FROM_DOMAIN = "statki.pythonanywhere.com"
 # TO_DOMAIN = "149.156.43.57/p23"
 
 app = Flask(__name__)
-# should be updated to working db URI to run on heroku
+
+
 pusher = pusher_client = pusher.Pusher(
     app_id='1410664',
     key='4d2726b6eaed69e2834f',
@@ -26,8 +30,13 @@ pusher = pusher_client = pusher.Pusher(
     ssl=True
 )
 name = ''
+# app.config[
+#     'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
+
+#should be updated to working db URI to run on heroku
 app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
+    'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:postgres@localhost:5432/postgres'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 
@@ -59,6 +68,8 @@ class Users(UserMixin, db.Model):
         return '<User %r>' % self.name
 
 
+
+
 class GameResult(Enum):
     WON = 1
     LOST = 2
@@ -70,18 +81,15 @@ class GameState(Enum):
     ENDED = 2
     IN_PREPARATION = 3
 
-
 class Games(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     state = db.Column(db.String(50), unique=False)
-
 
 class PlayersGames(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer)
     player_id = db.Column(db.Integer)
     result = db.Column(db.String(50))
-
 
 db.create_all()
 login_manager = LoginManager()
@@ -96,6 +104,7 @@ def password_generator(len_of_password):
     num = string.digits
 
     all = lower + upper + num
+
     temp = random.sample(all, length)
     password = "".join(temp)
 
@@ -134,7 +143,6 @@ def pusher_authentication():
     )
     return json.dumps(auth)
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(user_id)
@@ -150,6 +158,7 @@ def get_games_lost_for_player():
 
 def get_games_in_progress_for_player():
     pass
+
 
 
 @login_required
@@ -179,6 +188,7 @@ def login():
             login_user(user)
             next = request.args.get("next")
             return redirect(next or url_for('play'))
+
         flash('Nieprawidłowy adres e-mail lub hasło.')
     return render_template('login.html', form=form)
 
@@ -241,8 +251,10 @@ def logout():
 #     return redirect(urlunparse(urlparts_list), code=301)
 
 
+
 if __name__ == "__main__":
     app.debug = True
     app.run()
 
 name = ''
+
