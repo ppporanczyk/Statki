@@ -22,16 +22,20 @@
         <nav class="navbar">
             <ul>
                 {% if current_user.is_anonymous %}
+                current_user
                 <li><a href="{{ url_for('login') }}" class="navbar-item">
                         Logowanie
                     </a></li>
                 <li><a href="{{ url_for('register') }}">Rejestracja</a></li>
                 {% else %}
+                <li> <a href="{{ url_for('profile') }}" class="navbar-item">
+                        Wyświetl profil
+                    </a>
+                </li>
                 <li> <a href="{{ url_for('logout') }}" class="navbar-item">
                         Wyloguj się
                     </a>
                 </li>
-
             {% endif %}
             </ul>
         </nav>

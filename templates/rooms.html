@@ -8,7 +8,7 @@
             <th>Dostępni gracze</th>
         </tr>
         {% for avail in available %}<tr>
-            <td>{{ avail[1] }}</td>
+            <td>{{ avail }}</td>
         </tr>{% endfor %}
     </table>
 
@@ -17,7 +17,7 @@
             <th>Zajęci gracze</th>
         </tr>
         {% for in_g in in_game %}<tr>
-            <td>{{ in_g[1] }}</td>
+            <td>{{ in_g }}</td>
         </tr>{% endfor %}
     </table>
 
@@ -26,7 +26,7 @@
             <th>Wszyscy gracze</th>
         </tr>
         {% for user in users %}<tr>
-            <td>{{ user[1] }}</td>
+            <td>{{ user }}</td>
         </tr>{% endfor %}
     </table>
     {% else %}
