@@ -6,21 +6,17 @@ from flask import render_template, request
 from forms import LoginForm, RegistrationForm, ResetPasswordForm
 from flask_mail import Mail, Message
 
-
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from pusher import pusher
 from enum import Enum
 
-
-
 SECRET_KEY = os.urandom(32)
 # FROM_DOMAIN = "statki.pythonanywhere.com"
 # TO_DOMAIN = "149.156.43.57/p23"
 
 app = Flask(__name__)
-
 
 pusher = pusher_client = pusher.Pusher(
     app_id='1410664',
@@ -33,7 +29,7 @@ name = ''
 # app.config[
 #     'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
 
-#should be updated to working db URI to run on heroku
+# should be updated to working db URI to run on heroku
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:postgres@localhost:5432/postgres'
 
@@ -68,8 +64,6 @@ class Users(UserMixin, db.Model):
         return '<User %r>' % self.name
 
 
-
-
 class GameResult(Enum):
     WON = 1
     LOST = 2
@@ -81,15 +75,18 @@ class GameState(Enum):
     ENDED = 2
     IN_PREPARATION = 3
 
+
 class Games(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     state = db.Column(db.String(50), unique=False)
+
 
 class PlayersGames(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer)
     player_id = db.Column(db.Integer)
     result = db.Column(db.String(50))
+
 
 db.create_all()
 login_manager = LoginManager()
@@ -143,31 +140,31 @@ def pusher_authentication():
     )
     return json.dumps(auth)
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(user_id)
 
 
-def get_games_won_for_player():
-    pass
+def get_games_won_for_player(player_id):
+    PlayersGames.query.filter_by(player_id=player_id, result=GameResult.WON)
 
 
-def get_games_lost_for_player():
-    pass
+def get_games_lost_for_player(player_id):
+    PlayersGames.query.filter_by(player_id=player_id, result=GameResult.LOST)
 
 
-def get_games_in_progress_for_player():
-    pass
-
+def get_games_in_progress_for_player(player_id):
+    PlayersGames.query.filter_by(player_id=player_id, result=GameResult.NOT_CONCLUDED)
 
 
 @login_required
 @app.route('/profile')
 def profile():
     return render_template('profile.html',
-                           games_in_progress=get_games_in_progress_for_player(),
-                           games_won=get_games_won_for_player(),
-                           games_lost=get_games_lost_for_player())
+                           games_in_progress=get_games_in_progress_for_player(1),
+                           games_won=get_games_won_for_player(1),
+                           games_lost=get_games_lost_for_player(1))
 
 
 @login_required
@@ -232,7 +229,7 @@ def register():
                 db.session.add(user)
                 db.session.commit()
                 return redirect(url_for('login'))
-            flash('Użytkownik o takiem adresie mail już istnieje')
+            flash('Użytkownik o takim adresie mail już istnieje!')
     return render_template('register.html', form=form)
 
 
@@ -251,10 +248,8 @@ def logout():
 #     return redirect(urlunparse(urlparts_list), code=301)
 
 
-
 if __name__ == "__main__":
     app.debug = True
     app.run()
 
 name = ''
-
