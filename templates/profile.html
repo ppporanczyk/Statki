@@ -1,22 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="title">
-    Welcome, Player!
-</h1>
-<table>
-    <tr>
-        <td>Gry wygrane</td>
-        <td>{{games_won}}</td>
-    </tr>
-    <tr>
-        <td>Gry przegrane</td>
-        <td>{{games_lost}}</td>
-    </tr>
-    <tr>
-        <td>Gry w trakcie</td>
-        <td>{{games_in_progress}}</td>
-    </tr>
-</table>
-<tr>
-    {% endblock %}
+<section>
+    <table>
+        <tr>
+            <td>Gry wygrane</td>
+            <td>{{games_won}}</td>
+        </tr>
+        <tr>
+            <td>Gry przegrane</td>
+            <td>{{games_lost}}</td>
+        </tr>
+        <tr>
+            <td>Gry w trakcie</td>
+            <td>{{games_in_progress}}</td>
+        </tr>
+    </table>
+</section>
+{% endblock %}

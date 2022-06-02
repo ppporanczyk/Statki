@@ -146,25 +146,25 @@ def load_user(user_id):
     return Users.query.get(user_id)
 
 
-def get_games_won_for_player(player_id):
-    PlayersGames.query.filter_by(player_id=player_id, result=GameResult.WON)
+def get_games_won_for_player_number(player_id):
+    return len(PlayersGames.query.filter_by(player_id=player_id, result="won").all())
 
 
-def get_games_lost_for_player(player_id):
-    PlayersGames.query.filter_by(player_id=player_id, result=GameResult.LOST)
+def get_games_lost_for_player_number(player_id):
+    return len(PlayersGames.query.filter_by(player_id=player_id, result="lost").all())
 
 
-def get_games_in_progress_for_player(player_id):
-    PlayersGames.query.filter_by(player_id=player_id, result=GameResult.NOT_CONCLUDED)
+def get_games_in_progress_for_player_number(player_id):
+    return len(PlayersGames.query.filter_by(player_id=player_id, result="not_concluded").all())
 
 
 @login_required
 @app.route('/profile')
 def profile():
     return render_template('profile.html',
-                           games_in_progress=get_games_in_progress_for_player(1),
-                           games_won=get_games_won_for_player(1),
-                           games_lost=get_games_lost_for_player(1))
+                           games_in_progress=get_games_in_progress_for_player_number(1),
+                           games_won=get_games_won_for_player_number(1),
+                           games_lost=get_games_lost_for_player_number(1))
 
 
 @login_required
