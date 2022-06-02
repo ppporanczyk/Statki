@@ -230,8 +230,32 @@ form {
     position: absolute;
 }
 
-table,
-th,
-td {
-    border: 1px solid black;
+.stat_table
+{
+    border: 1px solid #0088ff;
+    border-collapse: collapse;
+    padding: 3px;
+    font-family:Verdana;
+    font-size:12px;
+    text-align: left;
+}
+
+.stat_th
+{
+    border: 1px solid #0088ff;
+    border-collapse: collapse;
+    padding: 3px;
+    font-family:Verdana;
+    font-size:12px;
+    text-align: left;
+}
+
+.stat_td
+{
+    border: 1px solid #0088ff;
+    border-collapse: collapse;
+    padding: 3px;
+    font-family:Verdana;
+    font-size:12px;
+    text-align: left;
 }

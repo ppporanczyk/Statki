@@ -1,19 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <section>
-    <table>
+    <h1>Statystyki gier</h1>
+    <table class="stat_table">
         <tr>
-            <td>Gry wygrane</td>
-            <td>{{games_won}}</td>
+            <td class="stat_td">Gry wygrane</td>
+            <td class="stat_td">{{games_won}}</td>
         </tr>
         <tr>
-            <td>Gry przegrane</td>
-            <td>{{games_lost}}</td>
+            <td class="stat_td">Gry przegrane</td>
+            <td class="stat_td">{{games_lost}}</td>
         </tr>
         <tr>
-            <td>Gry w trakcie</td>
-            <td>{{games_in_progress}}</td>
+            <td class="stat_td">Gry w trakcie</td>
+            <td class="stat_td">{{games_in_progress}}</td>
         </tr>
     </table>
 </section>
