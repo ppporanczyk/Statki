@@ -1,22 +1,40 @@
 {% extends "base.html" %}
 
 {% block content %}
+
       <div id="app" class="container-fluid">
-        <div class="row mx-5" style="height: 50vh">
-          <div class="col-8 h-50 align-self-center">
-            <div class="row border rounded invisible h-50 w-75 m-auto" style="font-size: 3.6rem" ref="gameboard" @click="playerAction">
-              <div class="h-100 pr-2 col border border-dark" data-id="1" ref="1"></div>
-              <div class="col pr-2 border border-dark" data-id="2" ref="2"></div>
-              <div class="col pr-2 border border-dark" data-id="3" ref="3"></div>
-              <div class="w-100"></div>
-              <div class="h-100 pr-2 col border border-dark" data-id="4" ref="4"></div>
-              <div class="col pr-2 border border-dark" data-id="5" ref="5"></div>
-              <div class="col pr-2 border border-dark" data-id="6" ref="6"></div>
-              <div class="w-100"></div>
-              <div class="h-100 pr-2 col border border-dark" data-id="7" ref="7"></div>
-              <div class="col pr-2 border border-dark" data-id="8" ref="8"></div>
-              <div class="col pr-2 border border-dark" data-id="9" ref="9"></div>
-            </div>
+        <div class="row mx-5" style="height: 130vh">
+          <div class="col-8 h-10 align-self-center">
+            <h2>Plansza przeciwnika</h2>
+            <table class="row border rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem" ref="gameboard_main" @click="playerAction">
+              <tr>
+                <td class="h-100 pr-2 col border border-dark "></td>
+                {% for i in range(1,9) %}<td class="h-100 pr-2 col border border-dark">{{i}}</td>{%endfor%}
+              </tr>
+              {% for i in range(1,9) %}
+              <tr>
+                <td class="h-100 pr-2 col border border-dark" >{{ alphabet[i-1]}}</td>
+                {% for j in range(1,9) %}
+                <td class="col pr-2 border border-dark" data-id="{{ i }}{{ j }}" ref="{{ i }}{{ j }}"></td>
+                {%endfor%}
+              </tr>
+              {%endfor%}
+            </table>
+            <h2>Twoja plansza</h2>
+            <table id="yourBoxes"  class="row border rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem" ref="gameboard" @click="settingAction">
+              <tr>
+                <td class="h-100 pr-2 col border border-dark"></td>
+                {% for i in range(1,9) %}<td class="h-100 pr-2 col border border-dark">{{i}}</td>{%endfor%}
+              </tr>
+              {% for i in range(1,9) %}
+              <tr>
+                <td class="h-100 pr-2 col border border-dark" >{{ alphabet[i-1]}}</td>
+                {% for j in range(1,9) %}
+                <td class="col pr-2 border border-dark" data-id="{{ i }}{{ j }}" ref="{{ i }}{{ j }}"></td>
+                {%endfor%}
+              </tr>
+              {%endfor%}
+            </table>
           </div>
           <div class="col-4 pl-3">
             <div class="row h-100">
@@ -29,208 +47,246 @@
                 </li>
               </div>
               <div class="w-100"></div>
-              <div class="col text-center py-3 border h-25" style="background: #b6c0ca; font-size: 1em; font-weight: bold">
+              <div class="col text-center py-3 border h-25" @click="confirmSetup" style="cursor: pointer; background: #b6c0ca; font-size: 1em; font-weight: bold">
                 {% raw %} {{ status }} {% endraw %}
               </div>
             </div>
           </div>
         </div>
       </div>
-      <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-      <script src="https://js.pusher.com/4.2/pusher.min.js"></script>
-      <script>
-       Pusher.logToConsole = true;
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://js.pusher.com/4.2/pusher.min.js"></script>
+<script>
+ Pusher.logToConsole = true;
  var app = new Vue({
+    el: '#app',
 
-      el: '#app',
-
-      data: {
-        username: {{ name|tojson }},
-        players: 0,
-        connectedPlayers: [],
-        status: '',
-        pusher: new Pusher('4d2726b6eaed69e2834f', {
-          authEndpoint: '/pusher/auth',
-          cluster: 'eu',
-          encrypted: true
-        }),
-        otherPlayerName: '',
-        mychannel: {},
-        otherPlayerChannel: {},
-        firstPlayer: 0,
-        turn: 0,
-        boxes: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-      },
-
-      created () {
-        console.log("WYNIK " + this.username);
-        this.subscribe();
-        this.listeners();
-      },
-
-      methods: {
-      subscribe: function () {
-
-      let channel = this.pusher.subscribe('presence-channel');
-      this.myChannel = this.pusher.subscribe('private-' + this.username);
-
-      channel.bind('pusher:subscription_succeeded', (player) => {
-        this.players = player.count - 1;
-        player.each((player) => {
-          if (player.id != this.username){
-            this.connectedPlayers.push(player.id);}
-        });
-      });
-
-      channel.bind('pusher:member_added', (player) => {
-        this.players++;
-        this.connectedPlayers.push(player.id);
-      });
-
-      channel.bind('pusher:member_removed', (player) => {
-        this.players--;
-        var index = this.connectedPlayers.indexOf(player.id);
-        if (index > -1) {
-          this.connectedPlayers.splice(index, 1)
-        }
-      });
+    data: {
+    username: {{ name|tojson }},
+    alphabet: {{ alphabet|tojson }},
+    players: 0,
+    connectedPlayers: [],
+    status: '',
+    ready: 0,
+    opponentReady: 0,
+    pusher: new Pusher('4d2726b6eaed69e2834f', {
+        authEndpoint: '/pusher/auth',
+        cluster: 'eu',
+        encrypted: true
+    }),
+    otherPlayerName: '',
+    mychannel: {},
+    otherPlayerChannel: {},
+    turn: 0,
+    mainBoxes: [[0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0]],
+    yourBoxes: [[0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0]]
     },
 
-    listeners: function () {
-      this.pusher.bind('client-' + this.username, (message) => {
-        if (confirm('Do you want to start a game of Tic Tac Toe with ' + message)) {
-          this.otherPlayerName = message
-          this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
-          this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-            this.otherPlayerChannel.trigger('client-game-started', this.username)
-          })
-          this.startGame(message)
-        } else {
-          this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
-          this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-            this.otherPlayerChannel.trigger('client-game-declined', "")
-          })
-          this.gameDeclined()
-        }
-      }),
-
-      this.myChannel.bind('client-game-started', (message) => {
-        this.status = "Game started with " + message
-        this.$refs.gameboard.classList.remove('invisible');
-        this.firstPlayer = 1;
-        this.turn = 1;
-      })
-
-      this.myChannel.bind('client-game-declined', () => {
-        this.status = "Game declined"
-      })
-
-      this.myChannel.bind('client-new-move', (position) => {
-        this.$refs[position].innerText = this.firstPlayer ? 'O' : 'X'
-      })
-
-      this.myChannel.bind('client-your-turn', () => {
-        this.turn = 1;
-      })
-
-      this.myChannel.bind('client-box-update', (update) => {
-        this.boxes = update;
-      })
-
-      this.myChannel.bind('client-you-lost', () => {
-        this.gameLost();
-      })
+    created () {
+      this.subscribe();
+      this.listeners();
     },
 
-    // Lets you choose a player to play as.
-    choosePlayer: function (e) {
-      this.otherPlayerName = e.target.innerText
-      this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
-      this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-        this.otherPlayerChannel.trigger('client-' + this.otherPlayerName, this.username)
-      });
-    },
+    methods: {
+        subscribe: function () {
+            let channel = this.pusher.subscribe('presence-channel');
+            this.myChannel = this.pusher.subscribe('private-' + this.username);
+            channel.bind('pusher:subscription_succeeded', (player) => {
+                this.players = player.count - 1;
+                player.each((player) => {
+                    if (player.id != this.username){
+                      this.connectedPlayers.push(player.id);}
+                });
+            });
+            channel.bind('pusher:member_added', (player) => {
+                this.players++;
+                this.connectedPlayers.push(player.id);
+            });
+            channel.bind('pusher:member_removed', (player) => {
+                this.players--;
+                var index = this.connectedPlayers.indexOf(player.id);
+                if (index > -1) {
+                  this.connectedPlayers.splice(index, 1)
+                }
+            });
+        },
 
-    // Begins the game
-    startGame: function (name) {
-      this.status = "Game started with " + name
-      this.$refs.gameboard.classList.remove('invisible');
-    },
+        listeners: function () {
+            this.pusher.bind('client-' + this.username, (message) => {
+                if (confirm(message + ' zaprasza cię do gry w statki')) {
+                    this.otherPlayerName = message
+                    this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
+                    this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                        this.otherPlayerChannel.trigger('client-set-ships', message)
+                    })
+                this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
+                } else {
+                    this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
+                    this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                        this.otherPlayerChannel.trigger('client-game-declined', "")
+                    })
+                  this.gameDeclined()
+                }
+            }),
 
-    // User declined to play
-    gameDeclined: function () {
-      this.status = "Game declined"
-    },
+            this.myChannel.bind('client-game-started', (message) => {
+                this.status = "Zaczynasz bitwe z  " + message
+                this.turn = 1;
+            })
 
-    // Game has ended with current user winning
-    gameWon: function () {
-      this.status = "You WON!"
-      this.$refs.gameboard.classList.add('invisible');
-      this.restartGame()
-    },
+            this.myChannel.bind('client-set-ships', (message) => {this.setShipsOnMap()})
 
-    // Game has ended with current user losing
-    gameLost: function () {
-      this.turn = 1;
-      this.boxes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-      this.status = "You LOST!"
-      this.$refs.gameboard.classList.add('invisible');
-      this.restartGame()
-    },
+            this.myChannel.bind('client-game-declined', () => {this.status = "Odmowa bitwy"})
 
-    // Restarts a game
-    restartGame: function () {
-      for (i = 1; i < 10; i++) {
-        this.$refs[i].innerText = ""
-      }
-      this.$refs.gameboard.classList.remove('invisible');
-    },
+            this.myChannel.bind('client-is-ready', () => {this.opponentReady = 1;})
 
-    // Checks tiles to see if the tiles passed are a match
-    compare: function () {
-      for (var i = 1; i < arguments.length; i++) {
-        if (arguments[i] === 0 || arguments[i] !== arguments[i - 1]) {
-          return false
-        }
-      }
+            this.myChannel.bind('client-your-turn', () => {this.turn = 1;})
 
-      return true;
-    },
+            this.myChannel.bind('client-box-update', (update) => {this.mainBoxes = update;})
 
-    // Checks the tiles and returns true if theres a winning play
-    theresAMatch: function () {
-      return this.compare(this.boxes[0], this.boxes[1], this.boxes[2]) ||
-        this.compare(this.boxes[3], this.boxes[4], this.boxes[5]) ||
-        this.compare(this.boxes[6], this.boxes[7], this.boxes[8]) ||
-        this.compare(this.boxes[0], this.boxes[3], this.boxes[6]) ||
-        this.compare(this.boxes[1], this.boxes[4], this.boxes[7]) ||
-        this.compare(this.boxes[2], this.boxes[5], this.boxes[8]) ||
-        this.compare(this.boxes[2], this.boxes[4], this.boxes[6]) ||
-        this.compare(this.boxes[0], this.boxes[4], this.boxes[8])
-    },
+            this.myChannel.bind('client-you-lost', () => {this.gameLost();})
 
-    // Checks to see if the play was a winning play
-    playerAction: function (e) {
-      let index = e.target.dataset.id - 1
-      let tile = this.firstPlayer ? 'X' : 'O'
+            this.myChannel.bind('client-ask-position', (yPos, xPos) => {this.getValueOnPos(yPos, xPos);})
 
-      if (this.turn && this.boxes[index] == 0) {
-        this.turn = 0
-        this.boxes[index] = tile
-        e.target.innerText = tile
+            this.myChannel.bind('client-return-value', (value) => {this.getValueFromOpponent(value);})
+        },
 
-        this.otherPlayerChannel.trigger('client-your-turn', "")
-        this.otherPlayerChannel.trigger('client-box-update', this.boxes)
-        this.otherPlayerChannel.trigger('client-new-move', e.target.dataset.id)
+        // Wyslanie zaproszenia do gry
+        choosePlayer: function (e) {
+            this.otherPlayerName = e.target.innerText
+            this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
+            this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                this.otherPlayerChannel.trigger('client-' + this.otherPlayerName, this.username)
+            });
+        },
 
-        if (this.theresAMatch()) {
-          this.gameWon()
-          this.boxes = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-          this.otherPlayerChannel.trigger('client-you-lost', '')
-        }
-      }
-    },
-      }
-    });
-      </script>
+        // Potwierdz ulozenie planszy
+        confirmSetup: function (e) {
+            this.ready = 1
+            if (this.opponentReady == 0){
+                this.otherPlayerChannel.trigger('client-is-ready', "")
+            } else{
+                this.startGame()
+                this.otherPlayerChannel.trigger('client-game-started', "")
+            }
+          },
+
+        // Set ships on the map
+        setShipsOnMap: function () {this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "},
+
+        // rozpoczecie gry
+        startGame: function () {
+            this.status = "Gra zaczeta ";
+            //dorobic blokowanie yourBoxes!!!!!!
+        },
+
+        // Gracz odmowil rozgrywki
+        gameDeclined: function () {this.status = "Nie przyjęto zaproszenia"},
+
+        // Obecny gracz wygrywa
+        gameWon: function () {
+            this.status = "Wygrales!"
+            this.restartGame()
+        },
+
+        // Obecny gracz przegrywa
+        gameLost: function () {
+            this.turn = 1;
+            this.status = "Przegrales!"
+            this.restartGame()
+        },
+
+        restartGame: function () {
+            this.$refs.gameboard_main.classList.add('invisible');
+            this.$refs.gameboard.classList.add('invisible');
+                for (i = 1; i < 9; i++) {
+                    for (j = 1; j < 9; j++) {
+                       this.$refs[i][j].style.background  = 'white';
+                       this.mainBoxes[i][j] = 0;
+                       this.yourBoxes[i][j] = 0
+                    }
+                }
+              this.$refs.gameboard_main.classList.remove('invisible');
+              this.$refs.gameboard.classList.remove('invisible');
+        },
+
+        // sprawdza, czy wszystkie statki zostaly znalezione
+        theresAMatch: function () {
+            for (var i = 1; i < 9; i++) {
+                for (var j = 1; j < 9; j++) {
+                    if (this.mainBoxes[i][j] == 2) {  //POPRAWIC
+                        return false
+                    }
+                }
+            }
+            return true
+        },
+
+        // Ustawianie statkow + Dodac walidacje rozstawiania
+        settingAction: function (e) {
+            let index = e.target.dataset.id
+            let yPos = (Math.floor(index/10))-1
+            let xPos = index%10 -1
+
+            console.log(yPos + ' ' +xPos + " " + this.yourBoxes[yPos][xPos])
+            if (this.yourBoxes[yPos][xPos] == 0) {
+                this.yourBoxes[yPos][xPos] = 2
+                e.target.style.background = 'black'
+            } else if (this.yourBoxes[yPos][xPos] == 2) {
+                this.yourBoxes[yPos][xPos] = 0
+                e.target.style.background = 'white'
+            }
+        },
+
+        getValueOnPos: function (yPos, xPos){
+            var value = this.yourBoxes[yPos][xPos]
+            this.otherPlayerChannel.trigger('client-return-value', value)
+        },
+
+        getValueFromOpponent: function (value){
+            if (value == 2 ){
+                this.mainBoxes[yPos][xPos] = 1
+                this.$refs[yPos][xPos].style.background = 'green'
+            } else {
+                this.mainBoxes[yPos][xPos] = -1
+                this.$refs[yPos][xPos].style.background = 'red'
+                this.otherPlayerChannel.trigger('client-your-turn', "")
+            }
+
+            this.otherPlayerChannel.trigger('client-box-update', this.mainBoxes)
+            if (this.theresAMatch()) {
+                this.gameWon()
+                this.otherPlayerChannel.trigger('client-you-lost', '')
+            }
+        },
+
+        // Checks to see if the play was a winning play
+        playerAction: function (e) {
+            let index = e.target.dataset.id
+            let yPos = (Math.floor(index/10))-1
+            let xPos = index%10 -1
+
+            if (this.turn && this.mainBoxes[yPos][xPos] == 0) {
+                this.turn = 0
+                this.otherPlayerChannel.trigger('client-ask-position', yPos, xPos)
+            }
+        },
+    }
+ });
+</script>
 {% endblock %}
