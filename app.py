@@ -26,12 +26,12 @@ pusher = pusher_client = pusher.Pusher(
     ssl=True
 )
 name = ''
-# app.config[
-#     'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
+app.config[
+    'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
 
 # should be updated to working db URI to run on heroku
-app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:postgres@localhost:5432/postgres'
+# app.config[
+#     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:postgres@localhost:5432/postgres'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -112,18 +112,23 @@ def get_gamers(status=None):
     gamers = Users.query.filter_by(status=status).all()
     return gamers
 
-
 @app.route('/')
 def main_page():
+    # global name
+    # name = request.args.get('name')
+    # if not name:
+    #     name = ''
     return render_template('index.html')
 
-
 @login_required
-@app.route('/play')
+@app.route('/rooms')
 def play():
-    global name
-    name = request.args.get('name')
-    return render_template('play.html', name=current_user.name)
+    # global name
+    # name = request.args.get('name')
+    # if not name:
+    #     name = ''
+    alphabet = ['A','B','C','D','E','F','G','H']
+    return render_template('play.html', name=current_user.name, alphabet=alphabet)
 
 
 @app.route("/pusher/auth", methods=['POST'])
@@ -162,18 +167,9 @@ def get_games_in_progress_for_player_number(player_id):
 @app.route('/profile')
 def profile():
     return render_template('profile.html',
-                           games_in_progress=get_games_in_progress_for_player_number(1),
-                           games_won=get_games_won_for_player_number(1),
-                           games_lost=get_games_lost_for_player_number(1))
-
-
-@login_required
-@app.route('/rooms')
-def show_rooms():
-    return render_template('rooms.html',
-                           users=get_gamers(),
-                           available=get_gamers('available'),
-                           in_game=get_gamers('in_game'))
+                           games_in_progress=get_games_in_progress_for_player_number(current_user.id),
+                           games_won=get_games_won_for_player_number(current_user.id),
+                           games_lost=get_games_lost_for_player_number(current_user.id))
 
 
 @app.route('/login', methods=['GET', 'POST'])
