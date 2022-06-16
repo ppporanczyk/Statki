@@ -67,7 +67,7 @@
         data: {
           username: {{ name | tojson }},
           alphabet: {{ alphabet | tojson }},
-          DESTROYED_ENEMY_SHIP: 1,
+          DESTROYED_SHIP: 1,
           MISSED: -1,
           EMPTY: 0,
           OCCUPIED: 2,
@@ -76,7 +76,7 @@
           status: '',
           respond: 3,
           ready: 0,
-          opponentReady: 0,
+          opponentReady: false,
           pusher: new Pusher('4d2726b6eaed69e2834f', {
             authEndpoint: '/pusher/auth',
             cluster: 'eu',
@@ -164,8 +164,11 @@
               this.setShipsOnMap()
             })
 
-            this.myChannel.bind('client-is-ready', () => {
-              this.opponentReady = 1;
+            this.myChannel.bind('client-is-ready', (boxes) => {
+              this.opponentReady = true;
+              this.enemyBoxes = boxes
+              console.log("fuggg")
+              console.log(this.enemyBoxes)
             })
 
             this.myChannel.bind('client-game-started', (message) => {
@@ -173,8 +176,13 @@
               this.turn = 1
             })
 
-            this.myChannel.bind('client-ask-position', (data) => {
+            this.myChannel.bind('client-shoot-on-position', (data) => {
               this.getValueOnPos(data['yPos'], data['xPos']);
+              if(yourBoxes[data['yPos']][data['xPos']] == this.OCCUPIED) {
+                yourBoxes[data['yPos']][data['xPos']] = this.DESTROYED_SHIP
+              } else {
+                yourBoxes[data['yPos']][data['xPos']] = this.MISSED
+              }
             })
 
             this.myChannel.bind('client-return-value', data => this.executePlayerAction(data))
@@ -220,7 +228,7 @@
             let xPos = data['xPos'];
             let value = data['value'];
             if (value == this.OCCUPIED) {
-              this.mainBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
+              this.mainBoxes[yPos][xPos] = this.DESTROYED_SHIP
               this.currentEvent.target.style.background = 'green'
               this.turn = 1
             } else {
@@ -249,8 +257,8 @@
           // Potwierdz ulozenie planszy
           confirmSetup: function (e) {
             this.ready = 1
-            if (this.opponentReady == 0) {
-              this.otherPlayerChannel.trigger('client-is-ready', "")
+            if (this.opponentReady == false) {
+              this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
             } else {
               this.startGame()
               this.otherPlayerChannel.trigger('client-game-started', "")
@@ -273,7 +281,7 @@
               this.turn = 0
               console.log(yPos + " " + xPos)
 
-              this.otherPlayerChannel.trigger('client-ask-position', {
+              this.otherPlayerChannel.trigger('client-shoot-on-position', {
                 "yPos": yPos,
                 "xPos": xPos
               })
@@ -285,7 +293,7 @@
           getValueOnPos: function (yPos, xPos) {
             let value = this.yourBoxes[yPos][xPos]
             if (value == this.OCCUPIED) {
-              this.yourBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
+              this.yourBoxes[yPos][xPos] = this.DESTROYED_SHIP
             } else {
               this.yourBoxes[yPos][xPos] = this.MISSED
             }
@@ -301,7 +309,6 @@
           areAllPlayerShipsDestroyed: function () {
             for (var i = 0; i < 8; i++) {
               for (var j = 0; j < 8; j++) {
-
                 if (this.yourBoxes[i][j] == this.OCCUPIED) {
                   return false
                 }
