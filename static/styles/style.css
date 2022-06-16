@@ -72,7 +72,7 @@ li>a {
     padding: 1rem 1rem 0.3rem 1rem !important;
 }
 
-li:hover {
+.player-entry:hover {
     /* width: 2rem; */
     background-color: #3092fa;
 }
