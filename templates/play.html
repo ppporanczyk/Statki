@@ -44,10 +44,10 @@
             <p class="my-3">HI,{% raw %} {{ username }} {% endraw %} !!</p>
             <p class="my-3"> {% raw %} {{ players }} {% endraw %} online player(s) </p>
             <hr />
-            <li class="m-auto py-3 text-dark" style="cursor: pointer;" v-for="member in connectedPlayers"
+            <div class="player-entry m-auto py-3 text-dark" style="cursor: pointer;" v-for="member in connectedPlayers"
               @click="choosePlayer">
               {% raw %} {{ member }} {% endraw %}
-            </li>
+            </div>
           </div>
           <div class="w-100"></div>
           <div class="col text-center py-3 border h-25" @click="confirmSetup"
