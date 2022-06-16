@@ -1,310 +1,349 @@
 {% extends "base.html" %}
 
 {% block content %}
-      <div id="app" class="container-fluid">
-        <div class="row mx-5" style="height: 130vh">
-          <div class="col-8 h-10 align-self-center">
-            <h2>Plansza przeciwnika</h2>
-            <table class="row border rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem" ref="gameboard_main"
-                   @click="playerAction">
-              <tr>
-                <td class="h-100 pr-2 col border border-dark "></td>
-                {% for i in range(1,9) %}<td class="h-100 pr-2 col border border-dark">{{i}}</td>{%endfor%}
-              </tr>
-              {% for i in range(1,9) %}
-              <tr>
-                <td class="h-100 pr-2 col border border-dark" >{{ alphabet[i-1]}}</td>
-                {% for j in range(1,9) %}
-                <td class="col pr-2 border border-dark" data-id="{{ i }}{{ j }}" ref="{{ i }}{{ j }}"></td>
-                {%endfor%}
-              </tr>
-              {%endfor%}
-            </table>
-            <h2>Twoja plansza</h2>
-            <table id="yourBoxes"  class="row border rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem" ref="gameboard" @click="settingAction">
-              <tr>
-                <td class="h-100 pr-2 col border border-dark"></td>
-                {% for i in range(1,9) %}<td class="h-100 pr-2 col border border-dark">{{i}}</td>{%endfor%}
-              </tr>
-              {% for i in range(1,9) %}
-              <tr>
-                <td class="h-100 pr-2 col border border-dark" >{{ alphabet[i-1]}}</td>
-                {% for j in range(1,9) %}
-                <td class="col pr-2 border border-dark" data-id="{{ i }}{{ j }}" ref="{{ i }}{{ j }}"></td>
-                {%endfor%}
-              </tr>
-              {%endfor%}
-            </table>
+<div class="cintainer-xl">
+  <div id="app" class="container-xl">
+    <div class="row mx-5" style="height: 100vh">
+      <div class="col-8 h-10 align-self-center">
+        <h2>Plansza przeciwnika</h2>
+        <table class="row border rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem" ref="gameboard_main"
+          @click="playerAction">
+          <tr>
+            <td class="h-100 pr-2 col border border-dark "></td>
+            {% for i in range(1,9) %}<td class="h-100 pr-2 col border border-dark">{{i}}</td>{%endfor%}
+          </tr>
+          {% for i in range(1,9) %}
+          <tr>
+            <td class="h-100 pr-2 col border border-dark">{{ alphabet[i-1]}}</td>
+            {% for j in range(1,9) %}
+            <td class="col pr-2 border border-dark" data-id="{{ i }}{{ j }}" ref="{{ i }}{{ j }}"></td>
+            {%endfor%}
+          </tr>
+          {%endfor%}
+        </table>
+        <h2>Twoja plansza</h2>
+        <table id="yourBoxes" class="row border rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem"
+          ref="gameboard" @click="settingAction">
+          <tr>
+            <td class="h-100 pr-2 col border border-dark"></td>
+            {% for i in range(1,9) %}<td class="h-100 pr-2 col border border-dark">{{i}}</td>{%endfor%}
+          </tr>
+          {% for i in range(1,9) %}
+          <tr>
+            <td class="h-100 pr-2 col border border-dark">{{ alphabet[i-1]}}</td>
+            {% for j in range(1,9) %}
+            <td class="col pr-2 border border-dark" data-id="{{ i }}{{ j }}" ref="{{ i }}{{ j }}"></td>
+            {%endfor%}
+          </tr>
+          {%endfor%}
+        </table>
+      </div>
+      <div class="col-4 pl-3 playersList">
+        <div class="row h-75">
+          <div class="col border h-75 text-center " style="background: rgb(114, 230, 147);">
+            <p class="my-3">HI,{% raw %} {{ username }} {% endraw %} !!</p>
+            <p class="my-3"> {% raw %} {{ players }} {% endraw %} online player(s) </p>
+            <hr />
+            <li class="m-auto py-3 text-dark" style="cursor: pointer;" v-for="member in connectedPlayers"
+              @click="choosePlayer">
+              {% raw %} {{ member }} {% endraw %}
+            </li>
           </div>
-          <div class="col-4 pl-3">
-            <div class="row h-100">
-              <div class="col border h-75 text-center" style="background: rgb(114, 230, 147);">
-                <p class="my-3">HI,{% raw %} {{ username }} {% endraw %} !!</p>
-                <p class="my-3"> {% raw %} {{ players }} {% endraw %} online player(s) </p>
-                <hr/>
-                <li class="m-auto py-3 text-dark" style="cursor: pointer;" v-for="member in connectedPlayers" @click="choosePlayer">
-                  {% raw %} {{ member }} {% endraw %}
-                </li>
-              </div>
-              <div class="w-100"></div>
-              <div class="col text-center py-3 border h-25" @click="confirmSetup" style="cursor: pointer; background: #b6c0ca; font-size: 1em; font-weight: bold">
-                {% raw %} {{ status }} {% endraw %}
-              </div>
-            </div>
+          <div class="w-100"></div>
+          <div class="col text-center py-3 border h-25" @click="confirmSetup"
+            style="cursor: pointer; background: #b6c0ca; font-size: 1em; font-weight: bold">
+            {% raw %} {{ status }} {% endraw %}
           </div>
         </div>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="https://js.pusher.com/4.2/pusher.min.js"></script>
-<script>
-Pusher.logToConsole = true;
- var app = new Vue({
-    el: '#app',
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://js.pusher.com/4.2/pusher.min.js"></script>
+    <script>
+      Pusher.logToConsole = true;
+      var app = new Vue({
+        el: '#app',
 
-    data: {
-    username: {{ name|tojson }},
-    alphabet: {{ alphabet|tojson }},
-    DESTROYED_ENEMY_SHIP: 1,
-    MISSED: -1,
-    EMPTY: 0,
-    OCCUPIED: 2,
-    players: 0,
-    connectedPlayers: [],
-    status: '',
-    respond: 3,
-    ready: 0,
-    opponentReady: 0,
-    pusher: new Pusher('4d2726b6eaed69e2834f', {
-        authEndpoint: '/pusher/auth',
-        cluster: 'eu',
-        encrypted: true
-    }),
-    otherPlayerName: '',
-    mychannel: {},
-    otherPlayerChannel: {},
-    turn: 0,
-    mainBoxes: [[0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0]],
-    yourBoxes: [[0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0]]
-    },
+        data: {
+          username: {
+            {
+              name | tojson
+            }
+          },
+          alphabet: {
+            {
+              alphabet | tojson
+            }
+          },
+          DESTROYED_ENEMY_SHIP: 1,
+          MISSED: -1,
+          EMPTY: 0,
+          OCCUPIED: 2,
+          players: 0,
+          connectedPlayers: [],
+          status: '',
+          respond: 3,
+          ready: 0,
+          opponentReady: 0,
+          pusher: new Pusher('4d2726b6eaed69e2834f', {
+            authEndpoint: '/pusher/auth',
+            cluster: 'eu',
+            encrypted: true
+          }),
+          otherPlayerName: '',
+          mychannel: {},
+          otherPlayerChannel: {},
+          turn: 0,
+          mainBoxes: [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+          ],
+          yourBoxes: [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
+          ]
+        },
 
-    created () {
-      this.subscribe();
-      this.setupListeners();
-    },
+        created() {
+          this.subscribe();
+          this.setupListeners();
+        },
 
-    methods: {
-        subscribe: function () {
+        methods: {
+          subscribe: function () {
             let channel = this.pusher.subscribe('presence-channel');
             this.myChannel = this.pusher.subscribe('private-' + this.username);
             channel.bind('pusher:subscription_succeeded', (player) => {
-                this.players = player.count - 1;
-                player.each((player) => {
-                    if (player.id != this.username){
-                      this.connectedPlayers.push(player.id)}
-                })
+              this.players = player.count - 1;
+              player.each((player) => {
+                if (player.id != this.username) {
+                  this.connectedPlayers.push(player.id)
+                }
+              })
             })
             channel.bind('pusher:member_added', (player) => {
-                this.players++
-                this.connectedPlayers.push(player.id)
+              this.players++
+              this.connectedPlayers.push(player.id)
             })
             channel.bind('pusher:member_removed', (player) => {
-                this.players--
-                var index = this.connectedPlayers.indexOf(player.id);
-                if (index > -1) {
-                  this.connectedPlayers.splice(index, 1)
-                }
+              this.players--
+              var index = this.connectedPlayers.indexOf(player.id);
+              if (index > -1) {
+                this.connectedPlayers.splice(index, 1)
+              }
             })
-        },
+          },
 
-        setupListeners: function () {
+          setupListeners: function () {
             this.pusher.bind('client-' + this.username, (message) => {
-                if (confirm(message + ' zaprasza cię do gry w statki')) {
-                    this.otherPlayerName = message
-                    this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
-                    this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-                        this.otherPlayerChannel.trigger('client-set-ships', message)
-                    })
+              if (confirm(message + ' zaprasza cię do gry w statki')) {
+                this.otherPlayerName = message
+                this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
+                this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                  this.otherPlayerChannel.trigger('client-set-ships', message)
+                })
                 this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
-                } else {
-                    this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
-                    this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-                        this.otherPlayerChannel.trigger('client-game-declined', "")
-                    })
-                  this.gameDeclined()
-                }
-            })
-
-            this.myChannel.bind('client-game-declined', () => {this.status = "Odmowa bitwy"})
-
-            this.myChannel.bind('client-set-ships', (message) => {this.setShipsOnMap()})
-
-            this.myChannel.bind('client-is-ready', () => {this.opponentReady = 1;})
-
-            this.myChannel.bind('client-game-started', (message) => {
-                this.status = "Zaczynasz bitwe z  " + message + " Twój ruch!"
-                this.turn = 1
-            })
-
-            this.myChannel.bind('client-ask-position', (data) => {this.getValueOnPos(data['yPos'], data['xPos']);})
-
-            this.myChannel.bind('client-return-value', (data) => {this.respond = data['value']; })
-
-            this.myChannel.bind('client-your-turn', () => {
-                this.turn = 1
-                this.status = "Twój ruch!"
-            })
-
-            this.myChannel.bind('client-ask-match', () => {
-                if(this.areAllPlayerShipsDestroyed()){
-                    this.gameLost()
-                    this.otherPlayerChannel.trigger('client-you-won', "")
+              } else {
+                this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
+                this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                  this.otherPlayerChannel.trigger('client-game-declined', "")
+                })
+                this.gameDeclined()
               }
             })
 
-            this.myChannel.bind('client-you-won', () => {this.gameWon();})
-        },
+            this.myChannel.bind('client-game-declined', () => {
+              this.status = "Odmowa bitwy"
+            })
 
-        // Wyslanie zaproszenia do gry
-        choosePlayer: function (e) {
+            this.myChannel.bind('client-set-ships', (message) => {
+              this.setShipsOnMap()
+            })
+
+            this.myChannel.bind('client-is-ready', () => {
+              this.opponentReady = 1;
+            })
+
+            this.myChannel.bind('client-game-started', (message) => {
+              this.status = "Zaczynasz bitwe z  " + message + " Twój ruch!"
+              this.turn = 1
+            })
+
+            this.myChannel.bind('client-ask-position', (data) => {
+              this.getValueOnPos(data['yPos'], data['xPos']);
+            })
+
+            this.myChannel.bind('client-return-value', (data) => {
+              this.respond = data['value'];
+            })
+
+            this.myChannel.bind('client-your-turn', () => {
+              this.turn = 1
+              this.status = "Twój ruch!"
+            })
+
+            this.myChannel.bind('client-ask-match', () => {
+              if (this.areAllPlayerShipsDestroyed()) {
+                this.gameLost()
+                this.otherPlayerChannel.trigger('client-you-won', "")
+              }
+            })
+
+            this.myChannel.bind('client-you-won', () => {
+              this.gameWon();
+            })
+          },
+
+          // Wyslanie zaproszenia do gry
+          choosePlayer: function (e) {
             this.otherPlayerName = e.target.innerText
             this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
             this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-                this.otherPlayerChannel.trigger('client-' + this.otherPlayerName, this.username)
+              this.otherPlayerChannel.trigger('client-' + this.otherPlayerName, this.username)
             });
-        },
+          },
 
-        // Gracz odmowil rozgrywki
-        gameDeclined: function () {this.status = "Nie przyjęto zaproszenia"},
+          // Gracz odmowil rozgrywki
+          gameDeclined: function () {
+            this.status = "Nie przyjęto zaproszenia"
+          },
 
-        // Set ships on the map
-        setShipsOnMap: function () {this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "},
+          // Set ships on the map
+          setShipsOnMap: function () {
+            this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "
+          },
 
-        // Ustawianie statkow + Dodac walidacje rozstawiania
-        settingAction: function (e) {
+          // Ustawianie statkow + Dodac walidacje rozstawiania
+          settingAction: function (e) {
             let index = e.target.dataset.id
-            let yPos = (Math.floor(index/10))-1
-            let xPos = index%10 -1
+            let yPos = (Math.floor(index / 10)) - 1
+            let xPos = index % 10 - 1
 
-            console.log(yPos + ' ' +xPos + " " + this.yourBoxes[yPos][xPos])
+            console.log(yPos + ' ' + xPos + " " + this.yourBoxes[yPos][xPos])
             if (this.yourBoxes[yPos][xPos] == 0) {
-                this.yourBoxes[yPos][xPos] = this.OCCUPIED
-                e.target.style.background = 'black'
+              this.yourBoxes[yPos][xPos] = this.OCCUPIED
+              e.target.style.background = 'black'
             } else if (this.yourBoxes[yPos][xPos] == this.OCCUPIED) {
-                this.yourBoxes[yPos][xPos] = 0
-                e.target.style.background = 'white'
-            }
-        },
-
-        // Potwierdz ulozenie planszy
-        confirmSetup: function (e) {
-            this.ready = 1
-            if (this.opponentReady == 0){
-                this.otherPlayerChannel.trigger('client-is-ready', "")
-            } else{
-                this.startGame()
-                this.otherPlayerChannel.trigger('client-game-started', "")
+              this.yourBoxes[yPos][xPos] = 0
+              e.target.style.background = 'white'
             }
           },
 
-        // rozpoczecie gry
-        startGame: function () {
-            this.status = "Gra zaczęta";
-            //dorobic blokowanie yourBoxes!!!!!!
-        },
+          // Potwierdz ulozenie planszy
+          confirmSetup: function (e) {
+            this.ready = 1
+            if (this.opponentReady == 0) {
+              this.otherPlayerChannel.trigger('client-is-ready', "")
+            } else {
+              this.startGame()
+              this.otherPlayerChannel.trigger('client-game-started', "")
+            }
+          },
 
-        // Checks to see if the play was a winning play
-         async playerAction(e) {
+          // rozpoczecie gry
+          startGame: function () {
+            this.status = "Gra rozpoczęta";
+            //dorobic blokowanie yourBoxes!!!!!!
+          },
+
+          // Checks to see if the play was a winning play CHECK IF IT IS WORKING
+          async playerAction(e) {
             let index = e.target.dataset.id
-            let yPos = (Math.floor(index/10))-1
-            let xPos = index%10 -1
+            let yPos = (Math.floor(index / 10)) - 1
+            let xPos = index % 10 - 1
 
             if (this.turn && this.mainBoxes[yPos][xPos] == 0) {
-                this.turn = 0
-                console.log(yPos + " " +xPos)
-                await this.otherPlayerChannel.trigger('client-ask-position', {"yPos": yPos, "xPos": xPos})
-                console.log("Wartosc pola " + this.respond)
-                if (this.respond == this.OCCUPIED ){
-                    this.mainBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
-                    e.target.style.background  = 'green'
-                    this.turn = 1
-                } else {
-                    this.mainBoxes[yPos][xPos] = this.MISSED
-                    e.target.style.background  = 'red'
-                    this.otherPlayerChannel.trigger('client-your-turn', "")
-                    this.status = "Ruch przeciwnika!"
-                }
+              this.turn = 0
+              console.log(yPos + " " + xPos)
+              await this.otherPlayerChannel.trigger('client-ask-position', {
+                "yPos": yPos,
+                "xPos": xPos
+              })
+              console.log("Wartosc pola " + this.respond)
+              if (this.respond == this.OCCUPIED) {
+                this.mainBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
+                e.target.style.background = 'green'
+                this.turn = 1
+              } else {
+                this.mainBoxes[yPos][xPos] = this.MISSED
+                e.target.style.background = 'red'
+                this.otherPlayerChannel.trigger('client-your-turn', "")
+                this.status = "Ruch przeciwnika!"
+              }
 
-                this.respond=3
-                this.otherPlayerChannel.trigger('client-ask-match', "")
+              this.respond = 3
+              this.otherPlayerChannel.trigger('client-ask-match', "")
             }
-        },
+          },
 
-        getValueOnPos: function (yPos, xPos){
+          getValueOnPos: function (yPos, xPos) {
             var value = this.yourBoxes[yPos][xPos]
-            if (value == this.OCCUPIED ){
-                this.yourBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
-<!--                this.$refs[yPos][xPos].style.background = 'green'-->
+            if (value == this.OCCUPIED) {
+              this.yourBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP <
+                !--this.$refs[yPos][xPos].style.background = 'green'-- >
             } else {
-                this.yourBoxes[yPos][xPos] = this.MISSED
-<!--                this.$refs[yPos][xPos].style.background = 'red'-->
-        }
-            this.otherPlayerChannel.trigger('client-return-value', {"value":value})
-        },
+              this.yourBoxes[yPos][xPos] = this.MISSED <
+                !--this.$refs[yPos][xPos].style.background = 'red'-- >
+            }
+            this.otherPlayerChannel.trigger('client-return-value', {
+              "value": value
+            })
+          },
 
 
-        // sprawdza, czy wszystkie statki zostaly znalezione
-        areAllPlayerShipsDestroyed: function () {
+          // sprawdza, czy wszystkie statki zostaly znalezione
+          areAllPlayerShipsDestroyed: function () {
             for (var i = 0; i < 8; i++) {
-                for (var j = 0; j < 8; j++) {
+              for (var j = 0; j < 8; j++) {
 
-                    if (this.yourBoxes[i][j] == this.OCCUPIED) {
-                        return false
-                    }
+                if (this.yourBoxes[i][j] == this.OCCUPIED) {
+                  return false
                 }
+              }
             }
             return true
-        },
+          },
 
-        // Obecny gracz wygrywa
-        gameWon: function () {
+          // Obecny gracz wygrywa
+          gameWon: function () {
             this.status = "Wygrałeś!"
-        },
+          },
 
-        // Obecny gracz przegrywa
-        gameLost: function () {
+          // Obecny gracz przegrywa
+          gameLost: function () {
             this.status = "Przegrałeś!"
-        },
+          },
 
-        restartGame: function () {
+          restartGame: function () {
             this.$refs.gameboard_main.classList.add('invisible');
             this.$refs.gameboard.classList.add('invisible');
-                for (i = 0; i < 8; i++) {
-                    for (j = 0; j < 8; j++) {
-<!--                       this.$refs[i][j].style.background  = 'white';-->
-                       this.mainBoxes[i][j] = 0;
-                       this.yourBoxes[i][j] = 0
-                    }
-                }
-              this.$refs.gameboard_main.classList.remove('invisible');
-              this.$refs.gameboard.classList.remove('invisible');
-        },
-    }
- });
-</script>
-
+            for (i = 0; i < 8; i++) {
+              for (j = 0; j < 8; j++) {
+                <
+                !--this.$refs[i][j].style.background = 'white';
+                -- >
+                this.mainBoxes[i][j] = 0;
+                this.yourBoxes[i][j] = 0
+              }
+            }
+            this.$refs.gameboard_main.classList.remove('invisible');
+            this.$refs.gameboard.classList.remove('invisible');
+          },
+        }
+      });
+    </script>
+  </div>
 </div>
-
 {% endblock %}

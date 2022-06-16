@@ -13,20 +13,24 @@ body {
 }
 
 .mainBody {
-    margin-top: 1rem;
+    /* margin-top: 1rem; */
+    background-color: rgb(171, 212, 248);
+    /* padding: 10vh; */
 }
 
 header {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: space-between;
     padding: 0rem 5rem;
     height: 5rem;
-    background: linear-gradient(180deg, #6fb4fd 0%, #5caafc 100%);
+    background: linear-gradient(180deg, #6fb4fd 0%, #5caafc 100%) !important;
 }
 
+
+
 .brand a {
-    text-decoration: none;
+    text-decoration: none !important;
     font-size: 1.2rem;
     font-weight: 600;
     color: rgb(255, 255, 255);
@@ -58,10 +62,14 @@ li {
 }
 
 li>a {
-    text-decoration: none;
+    text-decoration: none !important;
     color: #fff;
     font-size: 0.9rem;
     font-weight: 500;
+}
+
+.navbar {
+    padding: 1rem 1rem 0.3rem 1rem !important;
 }
 
 li:hover {
@@ -225,38 +233,46 @@ form {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    position: absolute;
+    padding: 10vh;
+
+    /* overflow: hidden;
+    position: absolute; */
 }
 
-.stat_table
-{
-    border: 1px solid #0088ff;
+.stat_table {
+    border: 1px solid #1100ff;
     border-collapse: collapse;
     padding: 3px;
-    font-family:Verdana;
-    font-size:12px;
+    font-family: Verdana;
+    font-size: 12px;
     text-align: left;
+    margin-top: 10px;
+    height: 100px;
+    width: 200px;
+    text-align: center;
+    font-weight: bold;
+    padding-top: 10vh;
 }
 
-.stat_th
-{
-    border: 1px solid #0088ff;
+.stat_th {
+    border: 4px solid #0088ff;
     border-collapse: collapse;
-    padding: 3px;
-    font-family:Verdana;
-    font-size:12px;
-    text-align: left;
+    padding: 7px;
+    font-family: Verdana;
+    font-size: 12px;
+    text-align: center;
 }
 
-.stat_td
-{
+.stat_td {
     border: 1px solid #0088ff;
     border-collapse: collapse;
-    padding: 3px;
-    font-family:Verdana;
-    font-size:12px;
-    text-align: left;
+    padding: 7px;
+    font-family: Verdana;
+    font-size: 12px;
+    text-align: center;
+}
+
+.playersList {
+    right: 0;
+    margin-top: 10vh !important;
 }
