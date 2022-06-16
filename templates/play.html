@@ -177,9 +177,7 @@
               this.getValueOnPos(data['yPos'], data['xPos']);
             })
 
-            this.myChannel.bind('client-return-value', (data) => {
-              this.respond = data['value'];
-            })
+            this.myChannel.bind('client-return-value', data => this.executePlayerAction(data))
 
             this.myChannel.bind('client-your-turn', () => {
               this.turn = 1
@@ -217,6 +215,22 @@
             this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "
           },
 
+          executePlayerAction: function (data) {
+            let yPos = data['yPos'];
+            let xPos = data['xPos'];
+            let value = data['value'];
+            if (value == this.OCCUPIED) {
+              this.mainBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
+              this.currentEvent.target.style.background = 'green'
+              this.turn = 1
+            } else {
+              this.mainBoxes[yPos][xPos] = this.MISSED
+              this.currentEvent.target.style.background = 'red'
+              this.otherPlayerChannel.trigger('client-your-turn', "")
+              this.status = "Ruch przeciwnika!"
+            }
+          },
+
           // Ustawianie statkow + Dodac walidacje rozstawiania
           settingAction: function (e) {
             let yPos = e.target.dataset.i
@@ -251,6 +265,7 @@
 
           // Checks to see if the play was a winning play CHECK IF IT IS WORKING
           async playerAction(e) {
+            this.currentEvent = e
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
 
@@ -262,31 +277,21 @@
                 "yPos": yPos,
                 "xPos": xPos
               })
-              console.log("Wartość pola " + this.respond)
-              if (this.respond == this.OCCUPIED) {
-                this.mainBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
-                e.target.style.background = 'green'
-                this.turn = 1
-              } else {
-                this.mainBoxes[yPos][xPos] = this.MISSED
-                e.target.style.background = 'red'
-                this.otherPlayerChannel.trigger('client-your-turn', "")
-                this.status = "Ruch przeciwnika!"
-              }
 
-              this.respond = 3
               this.otherPlayerChannel.trigger('client-ask-match', "")
             }
           },
 
           getValueOnPos: function (yPos, xPos) {
-            var value = this.yourBoxes[yPos][xPos]
+            let value = this.yourBoxes[yPos][xPos]
             if (value == this.OCCUPIED) {
               this.yourBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
             } else {
               this.yourBoxes[yPos][xPos] = this.MISSED
             }
             this.otherPlayerChannel.trigger('client-return-value', {
+              "yPos": yPos,
+              "xPos": xPos,
               "value": value
             })
           },
@@ -320,7 +325,7 @@
             this.$refs.gameboard.classList.add('invisible');
             for (i = 0; i < 8; i++) {
               for (j = 0; j < 8; j++) {
-                this.mainBoxes[i][j] = this.EMPTY
+                this.mainBoxes[i][j] = this.EMPTY;
                 this.yourBoxes[i][j] = this.EMPTY
               }
             }
