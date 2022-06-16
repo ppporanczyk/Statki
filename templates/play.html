@@ -102,7 +102,7 @@ Pusher.logToConsole = true;
 
     created () {
       this.subscribe();
-      this.listeners();
+      this.setupListeners();
     },
 
     methods: {
@@ -129,7 +129,7 @@ Pusher.logToConsole = true;
             })
         },
 
-        listeners: function () {
+        setupListeners: function () {
             this.pusher.bind('client-' + this.username, (message) => {
                 if (confirm(message + ' zaprasza cię do gry w statki')) {
                     this.otherPlayerName = message
@@ -154,7 +154,7 @@ Pusher.logToConsole = true;
             this.myChannel.bind('client-is-ready', () => {this.opponentReady = 1;})
 
             this.myChannel.bind('client-game-started', (message) => {
-                this.status = "Zaczynasz bitwe z  " + message + " twoj ruch!"
+                this.status = "Zaczynasz bitwe z  " + message + " Twój ruch!"
                 this.turn = 1
             })
 
@@ -164,11 +164,11 @@ Pusher.logToConsole = true;
 
             this.myChannel.bind('client-your-turn', () => {
                 this.turn = 1
-                this.status = "Twoj ruch!"
+                this.status = "Twój ruch!"
             })
 
             this.myChannel.bind('client-ask-match', () => {
-                if(this.theresAMatch()){
+                if(this.areAllPlayerShipsDestroyed()){
                     this.gameLost()
                     this.otherPlayerChannel.trigger('client-you-won', "")
               }
@@ -221,7 +221,7 @@ Pusher.logToConsole = true;
 
         // rozpoczecie gry
         startGame: function () {
-            this.status = "Gra zaczeta ";
+            this.status = "Gra zaczęta";
             //dorobic blokowanie yourBoxes!!!!!!
         },
 
@@ -266,7 +266,7 @@ Pusher.logToConsole = true;
 
 
         // sprawdza, czy wszystkie statki zostaly znalezione
-        theresAMatch: function () {
+        areAllPlayerShipsDestroyed: function () {
             for (var i = 0; i < 8; i++) {
                 for (var j = 0; j < 8; j++) {
 
@@ -280,14 +280,12 @@ Pusher.logToConsole = true;
 
         // Obecny gracz wygrywa
         gameWon: function () {
-            this.status = "Wygrales!"
-            this.restartGame()
+            this.status = "Wygrałeś!"
         },
 
         // Obecny gracz przegrywa
         gameLost: function () {
-            this.status = "Przegrales!"
-            this.restartGame()
+            this.status = "Przegrałeś!"
         },
 
         restartGame: function () {
