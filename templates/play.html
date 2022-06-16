@@ -63,6 +63,10 @@ Pusher.logToConsole = true;
     data: {
     username: {{ name|tojson }},
     alphabet: {{ alphabet|tojson }},
+    DESTROYED_ENEMY_SHIP: 1,
+    MISSED: -1,
+    EMPTY: 0,
+    OCCUPIED: 2,
     players: 0,
     connectedPlayers: [],
     status: '',
@@ -196,9 +200,9 @@ Pusher.logToConsole = true;
 
             console.log(yPos + ' ' +xPos + " " + this.yourBoxes[yPos][xPos])
             if (this.yourBoxes[yPos][xPos] == 0) {
-                this.yourBoxes[yPos][xPos] = 2
+                this.yourBoxes[yPos][xPos] = this.OCCUPIED
                 e.target.style.background = 'black'
-            } else if (this.yourBoxes[yPos][xPos] == 2) {
+            } else if (this.yourBoxes[yPos][xPos] == this.OCCUPIED) {
                 this.yourBoxes[yPos][xPos] = 0
                 e.target.style.background = 'white'
             }
@@ -231,32 +235,30 @@ Pusher.logToConsole = true;
                 this.turn = 0
                 console.log(yPos + " " +xPos)
                 await this.otherPlayerChannel.trigger('client-ask-position', {"yPos": yPos, "xPos": xPos})
-                await new Promise(r => setTimeout(r, 1000)); //DO POPRAWY KONIECZNIE!
                 console.log("Wartosc pola " + this.respond)
-                if (this.respond == 2 ){
-                    this.mainBoxes[yPos][xPos] = 1
+                if (this.respond == this.OCCUPIED ){
+                    this.mainBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
                     e.target.style.background  = 'green'
                     this.turn = 1
                 } else {
-                    this.mainBoxes[yPos][xPos] = -1
+                    this.mainBoxes[yPos][xPos] = this.MISSED
                     e.target.style.background  = 'red'
                     this.otherPlayerChannel.trigger('client-your-turn', "")
                     this.status = "Ruch przeciwnika!"
                 }
 
                 this.respond=3
-                await new Promise(r => setTimeout(r, 1000)); //DO POPRAWY KONIECZNIE!
                 this.otherPlayerChannel.trigger('client-ask-match', "")
             }
         },
 
         getValueOnPos: function (yPos, xPos){
             var value = this.yourBoxes[yPos][xPos]
-            if (value == 2 ){
-                this.yourBoxes[yPos][xPos] = 1
+            if (value == this.OCCUPIED ){
+                this.yourBoxes[yPos][xPos] = this.DESTROYED_ENEMY_SHIP
 <!--                this.$refs[yPos][xPos].style.background = 'green'-->
             } else {
-                this.yourBoxes[yPos][xPos] = -1
+                this.yourBoxes[yPos][xPos] = this.MISSED
 <!--                this.$refs[yPos][xPos].style.background = 'red'-->
         }
             this.otherPlayerChannel.trigger('client-return-value', {"value":value})
@@ -268,7 +270,7 @@ Pusher.logToConsole = true;
             for (var i = 0; i < 8; i++) {
                 for (var j = 0; j < 8; j++) {
 
-                    if (this.yourBoxes[i][j] == 2) {
+                    if (this.yourBoxes[i][j] == this.OCCUPIED) {
                         return false
                     }
                 }
