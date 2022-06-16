@@ -65,16 +65,8 @@
         el: '#app',
 
         data: {
-          username: {
-            {
-              name | tojson
-            }
-          },
-          alphabet: {
-            {
-              alphabet | tojson
-            }
-          },
+          username: {{ name | tojson }},
+          alphabet: {{ alphabet | tojson }},
           players: 0,
           connectedPlayers: [],
           status: '',
@@ -289,11 +281,11 @@
           getValueOnPos: function (yPos, xPos) {
             var value = this.yourBoxes[yPos][xPos]
             if (value == 2) {
-              this.yourBoxes[yPos][xPos] = 1 <
-                !--this.$refs[yPos][xPos].style.background = 'green'-- >
+              this.yourBoxes[yPos][xPos] = 1
+                <!--this.$refs[yPos][xPos].style.background = 'green'-- >
             } else {
-              this.yourBoxes[yPos][xPos] = -1 <
-                !--this.$refs[yPos][xPos].style.background = 'red'-- >
+              this.yourBoxes[yPos][xPos] = -1
+                <!--this.$refs[yPos][xPos].style.background = 'red'-- >
             }
             this.otherPlayerChannel.trigger('client-return-value', {
               "value": value
@@ -331,9 +323,7 @@
             this.$refs.gameboard.classList.add('invisible');
             for (i = 0; i < 8; i++) {
               for (j = 0; j < 8; j++) {
-                <
-                !--this.$refs[i][j].style.background = 'white';
-                -- >
+                <!--this.$refs[i][j].style.background = 'white';-- >
                 this.mainBoxes[i][j] = 0;
                 this.yourBoxes[i][j] = 0
               }
