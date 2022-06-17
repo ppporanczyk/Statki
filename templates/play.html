@@ -146,6 +146,7 @@
 
           setupListeners: function () {
             this.pusher.bind('client-' + this.username, (message) => {
+              console.log("ustawiam listenerów")
               if (confirm('Użytkownik '+message + ' zaprasza cię do gry w statki, czy chcesz zagrać?')) {
                 this.otherPlayerName = message
                 this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
@@ -187,6 +188,8 @@
             })
 
             this.myChannel.bind('client-shoot-on-position', (data) => {
+              console.log("co tam jest: "+data['yPos']+" "+ data['xPos']);
+              // console.log("twojeboxy: "+yourBoxes[data['yPos']][data['xPos']]);
               this.getValueOnPos(data['yPos'], data['xPos']);
               if(yourBoxes[data['yPos']][data['xPos']] == this.OCCUPIED) {
                 yourBoxes[data['yPos']][data['xPos']] = this.DESTROYED_SHIP
@@ -225,12 +228,12 @@
 
           // Gracz odmowil rozgrywki
           gameDeclined: function () {
-            this.status = "Nie przyjęto zaproszenia"
+            this.status = "Nie przyjęto zaproszenia";
           },
 
           // Set ships on the map
           setShipsOnMap: function () {
-            this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "
+            this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy! "
             this.pregame=1
           },
 
@@ -255,13 +258,17 @@
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
             if(this.pregame==1){
-              console.log(yPos + ' ' + xPos + " " + this.yourBoxes[yPos][xPos])
+              console.log(yPos + ' ' + xPos + " " + this.yourBoxes[yPos][xPos]);
+
+
               if (this.yourBoxes[yPos][xPos] == this.EMPTY) {
                 this.yourBoxes[yPos][xPos] = this.OCCUPIED
                 e.target.style.background = 'black'
               } else if (this.yourBoxes[yPos][xPos] == this.OCCUPIED) {
                 this.yourBoxes[yPos][xPos] = this.EMPTY
                 e.target.style.background = 'rgb(171, 212, 248)'
+              }else{
+                console.log(this.yourBoxes[yPos][xPos])
               }
              }
           },
@@ -279,14 +286,14 @@
           // rozpoczecie gry
           startGame: function () {
             this.status = "Gra rozpoczęta";
-            this.pregame=0
+            this.pregame=0;
           },
 
           // Checks to see if the play was a winning play CHECK IF IT IS WORKING
           async playerAction(e) {
-            this.currentEvent = e
-            let yPos = e.target.dataset.i
-            let xPos = e.target.dataset.j
+            this.currentEvent = e;
+            let yPos = e.target.dataset.i;
+            let xPos = e.target.dataset.j;
 
             if (this.turn && this.mainBoxes[yPos][xPos] == this.EMPTY) {
               this.turn = 0
