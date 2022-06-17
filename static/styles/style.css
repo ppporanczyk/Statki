@@ -11,6 +11,10 @@ body {
     margin: 0;
     box-sizing: border-box;
 }
+.container{
+    padding-right:0 !important;
+    padding-left:0 !important;
+}
 
 .mainBody {
     /* margin-top: 1rem; */
@@ -279,12 +283,15 @@ form {
 }
 
 .playersList {
-    right: 0;
-    margin-top: 10vh !important;
+    /* right: 0; */
+    margin-top: 0vh !important;
+    margin-left: auto !important; 
+    margin-right: 0 !important;
 }
 .communicate{
     text-align: center;
     padding:10px;
+    font-weight: bold;
 }
 .statuses:hover{
     background: rgb(107, 108, 109) !important;
