@@ -30,7 +30,7 @@
       <div>
          {{ form.password2(placeholder="Powtórz hasło",class_='register_input') }}
       </div>
-      <h3><a class="do_you_have_account" href="{{ url_for('login') }}">Masz już konto?</a></h3>
+      <h3><a class="do_you_have_account" href="/p23{{ url_for('login') }}">Masz już konto?</a></h3>
       <div>{{ form.submit(class_='button') }}
       </div>
    </form>

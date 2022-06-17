@@ -26,25 +26,29 @@ pusher = pusher_client = pusher.Pusher(
     key='4d2726b6eaed69e2834f',
     secret='3ca2a9d952ba6921320b',
     cluster='eu',
-    ssl=True
+    ssl=True,
+    auth='/p23'
 )
 name = ''
-app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
-
 # app.config[
-#     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:1234@localhost:5432/postgres'
+#     'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
+
+app.config[
+    'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:1234@localhost:5432/postgres'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 CORS(app)
 
+app.config['PUSHER_AUTH'] = '/p23'
+
 # do wysyłania maili
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = "shipgamesender@gmail.com"
 app.config['MAIL_PASSWORD'] = "okretyOkrety2"
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
 db = SQLAlchemy(app)
@@ -232,7 +236,7 @@ def login():
         if user is not None and user.check_password(form.password.data):
             login_user(user)
             next = request.args.get("next")
-            return redirect(next or url_for('play'))
+            return redirect(next or '/p23'+url_for('play'))
 
         flash('Nieprawidłowy adres e-mail lub hasło.')
     return render_template('login.html', form=form)
@@ -260,7 +264,7 @@ def forget_password():
             user.set_password(new_password)
             db.session.commit()
             flash(f"Wysłano mail na adres: {form.email.data}")
-            return redirect(url_for('login'))
+            return redirect('/p23'+url_for('login'))
         flash('Użytkownik o takiem adresie mail nie istnieje')
     return render_template('forget_password.html', form=form)
 
@@ -276,7 +280,7 @@ def register():
                 user.set_password(form.password1.data)
                 db.session.add(user)
                 db.session.commit()
-                return redirect(url_for('login'))
+                return redirect('/p23'+url_for('login'))
             flash('Użytkownik o takim adresie mail już istnieje!')
     return render_template('register.html', form=form)
 
@@ -284,7 +288,7 @@ def register():
 @app.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect('/p23'+url_for('login'))
 
 
 # @app.before_request
