@@ -61,9 +61,11 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://js.pusher.com/4.2/pusher.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
       Pusher.logToConsole = true;
       var app = new Vue({
+
         el: '#app',
 
         data: {
@@ -77,7 +79,8 @@
           connectedPlayers: [],
           status: '',
           respond: 3,
-          ready: 0,
+          pregame: 0,
+          playerNum: 2,
           opponentReady: false,
           pusher: new Pusher('4d2726b6eaed69e2834f', {
             authEndpoint: '/pusher/auth',
@@ -88,6 +91,7 @@
           mychannel: {},
           otherPlayerChannel: {},
           turn: 0,
+          gameResult: 0,
           mainBoxes: [
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
@@ -148,6 +152,8 @@
                 this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
                   this.otherPlayerChannel.trigger('client-set-ships', message)
                 })
+                this.saveToDB()
+                this.playerNum = 1
                 this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
               } else {
                 this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
@@ -173,8 +179,11 @@
             })
 
             this.myChannel.bind('client-game-started', (message) => {
-              this.status = "Zaczynasz bitwe " + message + " Twój ruch!"
+
+              this.status = "Zaczynasz bitwe. Twój ruch!"
+
               this.turn = 1
+              this.pregame=0
             })
 
             this.myChannel.bind('client-shoot-on-position', (data) => {
@@ -222,6 +231,7 @@
           // Set ships on the map
           setShipsOnMap: function () {
             this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "
+            this.pregame=1
           },
 
           executePlayerAction: function (data) {
@@ -244,20 +254,20 @@
           settingAction: function (e) {
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
-
-            console.log(yPos + ' ' + xPos + " " + this.yourBoxes[yPos][xPos])
-            if (this.yourBoxes[yPos][xPos] == this.EMPTY) {
-              this.yourBoxes[yPos][xPos] = this.OCCUPIED
-              e.target.style.background = 'black'
-            } else if (this.yourBoxes[yPos][xPos] == this.OCCUPIED) {
-              this.yourBoxes[yPos][xPos] = this.EMPTY
-              e.target.style.background = 'white'
-            }
+            if(this.pregame==1){
+              console.log(yPos + ' ' + xPos + " " + this.yourBoxes[yPos][xPos])
+              if (this.yourBoxes[yPos][xPos] == this.EMPTY) {
+                this.yourBoxes[yPos][xPos] = this.OCCUPIED
+                e.target.style.background = 'black'
+              } else if (this.yourBoxes[yPos][xPos] == this.OCCUPIED) {
+                this.yourBoxes[yPos][xPos] = this.EMPTY
+                e.target.style.background = 'rgb(171, 212, 248)'
+              }
+             }
           },
 
           // Potwierdz ulozenie planszy
           confirmSetup: function (e) {
-            this.ready = 1
             if (this.opponentReady == false) {
               this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
             } else {
@@ -269,7 +279,7 @@
           // rozpoczecie gry
           startGame: function () {
             this.status = "Gra rozpoczęta";
-            //dorobic blokowanie yourBoxes!!!!!!
+            this.pregame=0
           },
 
           // Checks to see if the play was a winning play CHECK IF IT IS WORKING
@@ -305,7 +315,6 @@
             })
           },
 
-
           // sprawdza, czy wszystkie statki zostaly znalezione
           areAllPlayerShipsDestroyed: function () {
             for (var i = 0; i < 8; i++) {
@@ -321,11 +330,14 @@
           // Obecny gracz wygrywa
           gameWon: function () {
             this.status = "Wygrałeś!"
+            this.gameResult = 1
+            this.updateStatusGameToDB()
           },
 
           // Obecny gracz przegrywa
           gameLost: function () {
             this.status = "Przegrałeś!"
+            this.gameResult = 2
           },
 
           restartGame: function () {
@@ -340,9 +352,39 @@
             this.$refs.gameboard_main.classList.remove('invisible');
             this.$refs.gameboard.classList.remove('invisible');
           },
+
+          async saveToDB(){
+            var config = { headers: {'Content-Type': 'application/json'}}
+            const path = '/rooms';
+            await axios.post(path,{
+              gameResult: this.gameResult,
+              enemy: this.otherPlayerName,
+            },config)
+            .then(response => {
+                console.log(response)
+            })
+            .catch(error => {
+                console.log(error.response)
+            });
+          },
+
+          async updateStatusGameToDB(){
+            var config = { headers: {'Content-Type': 'application/json'}}
+            const path = '/rooms';
+            await axios.put(path,{
+              playerNum: this.playerNum,
+            },config)
+            .then(response => {
+                console.log(response)
+            })
+            .catch(error => {
+                console.log(error.response)
+            });
+          },
         }
-      });
+     });
     </script>
+
   </div>
 </div>
 {% endblock %}

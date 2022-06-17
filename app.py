@@ -3,8 +3,11 @@ import random
 import string
 from flask import *
 from flask import render_template, request
+from sqlalchemy import text
+
 from forms import LoginForm, RegistrationForm, ResetPasswordForm
 from flask_mail import Mail, Message
+from flask_cors import CORS
 
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -35,6 +38,7 @@ app.config[
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
+CORS(app)
 
 # do wysyłania maili
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -67,7 +71,7 @@ class Users(UserMixin, db.Model):
 class GameResult(Enum):
     WON = 1
     LOST = 2
-    NOT_CONCLUDED = 3
+    NOT_CONCLUDED = 0
 
 
 class GameState(Enum):
@@ -78,14 +82,11 @@ class GameState(Enum):
 
 class Games(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    state = db.Column(db.String(50), unique=False)
-
-
-class PlayersGames(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    game_id = db.Column(db.Integer)
-    player_id = db.Column(db.Integer)
-    result = db.Column(db.String(50))
+    player_1 = db.Column(db.Integer)
+    player_2 = db.Column(db.Integer)
+    points = db.Column(db.Integer)
+    result = db.Column(db.Integer) #kto wygral
+    status = db.Column(db.Integer) #1-w trakcie, 2-skonczona
 
 
 db.create_all()
@@ -112,23 +113,48 @@ def get_gamers(status=None):
     gamers = Users.query.filter_by(status=status).all()
     return gamers
 
+
 @app.route('/')
 def main_page():
-    # global name
-    # name = request.args.get('name')
-    # if not name:
-    #     name = ''
     return render_template('index.html')
+
 
 @login_required
 @app.route('/rooms')
 def play():
-    # global name
-    # name = request.args.get('name')
-    # if not name:
-    #     name = ''
-    alphabet = ['A','B','C','D','E','F','G','H']
+    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     return render_template('play.html', name=current_user.name, alphabet=alphabet)
+
+
+@login_required
+@app.route('/rooms', methods=["POST"])
+def new_game_init():
+    if request.method == "POST":
+        result = request.get_json()
+        enemy = Users.query.filter_by(name=result.get('enemy')).first()
+        sql_insert_one = text(
+            f"INSERT INTO games(player_1, player_2, points, status, result) \
+            VALUES ('{current_user.id}', '{enemy.id}', '{0}', '{1}', '0');")
+        db.session.execute(sql_insert_one)
+        db.session.commit()
+        response_object = {'status': 'success'}
+    return response_object
+
+
+@login_required
+@app.route('/rooms', methods=["PUT"])
+def end_game():
+    if request.method == "PUT":
+        result = request.get_json()
+        player = result.get('playerNum')
+        sql_insert_one = text(
+            f"UPDATE  games SET result={player}, status=2   WHERE status=1 AND player_{player}='{current_user.id}';")
+        print(sql_insert_one)
+        db.session.execute(sql_insert_one)
+
+        db.session.commit()
+        response_object = {'status': 'success'}
+    return response_object
 
 
 @app.route("/pusher/auth", methods=['POST'])
@@ -152,15 +178,18 @@ def load_user(user_id):
 
 
 def get_games_won_for_player_number(player_id):
-    return len(PlayersGames.query.filter_by(player_id=player_id, result="won").all())
+    return len(Games.query.filter_by(player_1=player_id, result=1).all()) + len(
+        Games.query.filter_by(player_2=player_id, result=2).all())
 
 
 def get_games_lost_for_player_number(player_id):
-    return len(PlayersGames.query.filter_by(player_id=player_id, result="lost").all())
+    return len(Games.query.filter_by(player_1=player_id, result=2).all()) + len(
+        Games.query.filter_by(player_2=player_id, result=1).all())
 
 
 def get_games_in_progress_for_player_number(player_id):
-    return len(PlayersGames.query.filter_by(player_id=player_id, result="not_concluded").all())
+    return len(Games.query.filter_by(player_1=player_id, result=0).all()) + len(
+        Games.query.filter_by(player_2=player_id, result=0).all())
 
 
 @login_required
