@@ -49,6 +49,22 @@ header {
     justify-content: center;
 
 }
+.back_to_previous{
+    display: block;
+    width: 18rem;
+    height: 3rem;
+    background: #4E9CAF;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    line-height: 25px;
+    text-decoration: none;
+}
+.back_to_previous:hover{
+    text-decoration: none;
+}
 
 ul {
     display: flex;
@@ -95,6 +111,9 @@ li>a {
     align-items: center;
     /* height: 50vh; */
     padding: 10px;
+}
+section {
+    padding-top: 2rem;
 }
 
 form {
