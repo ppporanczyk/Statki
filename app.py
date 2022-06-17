@@ -32,9 +32,8 @@ name = ''
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
 
-# should be updated to working db URI to run on heroku
 # app.config[
-#     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:postgres@localhost:5432/postgres'
+#     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:1234@localhost:5432/postgres'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
