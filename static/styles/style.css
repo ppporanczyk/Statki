@@ -276,3 +276,11 @@ form {
     right: 0;
     margin-top: 10vh !important;
 }
+.communicate{
+    text-align: center;
+    padding:10px;
+}
+.statuses:hover{
+    background: rgb(107, 108, 109) !important;
+    transition: .3s;
+}
