@@ -6,7 +6,7 @@
     <div class="row mx-5" style="height: 100vh">
       <div class="col-8 h-10 align-self-center">
         <h2>Plansza przeciwnika</h2>
-        <table class="row border rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem" ref="gameboard_main"
+        <table class="row  rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem" ref="gameboard_main"
           @click="playerAction">
           <tr>
             <td class="h-100 pr-2 col border border-dark "></td>
@@ -22,7 +22,7 @@
           {%endfor%}
         </table>
         <h2>Twoja plansza</h2>
-        <table id="yourBoxes" class="row border rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem"
+        <table id="yourBoxes" class="row rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem"
           ref="gameboard" @click="settingAction">
           <tr>
             <td class="h-100 pr-2 col border border-dark"></td>
@@ -40,7 +40,7 @@
       </div>
       <div class="col-4 pl-3 playersList">
         <div class="row h-75">
-          <div class="col border h-75 text-center " style="background: rgb(114, 230, 147);">
+          <div class="col h-75 text-center " style="background: rgb(114, 230, 147);">
             <p class="my-3">HI,{% raw %} {{ username }} {% endraw %} !!</p>
             <p class="my-3"> {% raw %} {{ players }} {% endraw %} online player(s) </p>
             <hr />
