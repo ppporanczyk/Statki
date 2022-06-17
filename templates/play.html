@@ -24,7 +24,7 @@
 
         <h2 class="p-4">Twoja plansza</h2>
         <table id="yourBoxes" class="row rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem"
-          ref="gameboard" @click="settingAction">
+          ref="gameboard" @mouseout="selectInRange" @mousedown="selectFrom" @mouseup="selectTo" ><!--@click="settingAction"-->
           <tr>
             <td class="h-100 pr-2 col border border-dark"></td>
             {% for i in range(0,8) %}<td class="h-100 pr-2 col border border-dark">{{i+1}}</td>{%endfor%}
@@ -55,6 +55,13 @@
             style="cursor: pointer; background: #b6c0ca; font-size: 1em; font-weight: bold">
             
             {% raw %} {{ status }} {% endraw %}
+          </div>
+          <div >
+            <p>Licznik statkow do rozlozenia</p>
+            <p>4-masztowce {% raw %} {{ ship4Len }}{% endraw %}</p>
+            <p>3-masztowce {% raw %} {{ ship3Len }}{% endraw %}</p>
+            <p>2-masztowce {% raw %} {{ ship2Len }}{% endraw %}</p>
+            <p>1-masztowce {% raw %} {{ ship1Len }}{% endraw %}</p>
           </div>
         </div>
       </div>
@@ -111,7 +118,12 @@
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0]
-          ]
+          ],
+          clickedFrom: 0,
+          ship4Len: 1,
+          ship3Len: 2,
+          ship2Len: 3,
+          ship1Len: 4,
         },
 
         created() {
@@ -147,9 +159,9 @@
           setupListeners: function () {
             this.pusher.bind('client-' + this.username, (message) => {
               if (confirm('Użytkownik '+message + ' zaprasza cię do gry w statki, czy chcesz zagrać?')) {
-                this.acceptInvitation()
+                this.acceptInvitation(message)
               } else {
-                this.declineInvitation()
+                this.declineInvitation(message)
               }
             })
 
@@ -168,9 +180,7 @@
             })
 
             this.myChannel.bind('client-game-started', (message) => {
-
               this.status = "Zaczynasz bitwe. Twój ruch!"
-
               this.turn = 1
               this.pregame=0
             })
@@ -203,7 +213,7 @@
             })
           },
 
-          acceptInvitation: function() {
+          acceptInvitation: function(message) {
             this.otherPlayerName = message
             this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
             this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
@@ -214,7 +224,7 @@
             this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
           },
 
-          declineInvitation: function() {
+          declineInvitation: function(message) {
             this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
             this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
               this.otherPlayerChannel.trigger('client-game-declined', "")
@@ -257,20 +267,90 @@
             }
           },
 
+          selectFrom: function(e) {
+            let yPos = e.target.dataset.i
+            let xPos = e.target.dataset.j
+            this.clickedFrom = [e]
+          },
+
+          selectInRange: function(e) {
+            if(this.clickedFrom !=0){
+              let yPos = e.target.dataset.i
+              let xPos = e.target.dataset.j
+              console.log(yPos + ' ' + xPos)
+              this.clickedFrom.push(e)
+
+             }
+          },
+
+          selectTo: function(e) {
+            if(this.clickedFrom !=0){
+              let yPos = e.target.dataset.i
+              let xPos = e.target.dataset.j
+              this.clickedFrom.push(e)
+              var clickedFields = this.clickedFrom.slice();
+              clickedFields.shift()
+              this.clickedFrom = 0
+              if(clickedFields.length<5){
+                var result =true
+                for (let i = 0; i < clickedFields.length; i++){
+                  result = this.settingAction(clickedFields[i], clickedFields.length);
+                  if(result==false){
+                    break
+                  }
+                }
+                if(result==true){
+                  if(clickedFields.length==4 && this.ship4Len!=0){
+                    this.ship4Len = this.ship4Len-1
+                    for (let i = 0; i < clickedFields.length; i++){
+                      this.changeFieldToBlack(clickedFields[i])
+                    }
+                  }else if(clickedFields.length==3 && this.ship3Len!=0){
+                    this.ship3Len = this.ship3Len-1
+                    for (let i = 0; i < clickedFields.length; i++){
+                      this.changeFieldToBlack(clickedFields[i])
+                    }
+                  }else if(clickedFields.length==2 && this.ship2Len!=0){
+                    this.ship2Len = this.ship2Len-1
+                    for (let i = 0; i < clickedFields.length; i++){
+                      this.changeFieldToBlack(clickedFields[i])
+                    }
+                  }else if(clickedFields.length==1 && this.ship1Len!=0){
+                    this.ship1Len = this.ship1Len-1
+                    for (let i = 0; i < clickedFields.length; i++){
+                      this.changeFieldToBlack(clickedFields[i])
+                    }
+                  }
+                  else{
+                    return 0
+                  }
+                }
+              }
+            }
+          },
+
           // Ustawianie statkow + Dodac walidacje rozstawiania
-          settingAction: function (e) {
+          settingAction: function (e, len) {
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
             if(this.pregame==1){
               console.log(yPos + ' ' + xPos + " " + this.yourBoxes[yPos][xPos])
               if (this.yourBoxes[yPos][xPos] == this.EMPTY) {
-                this.yourBoxes[yPos][xPos] = this.OCCUPIED
-                e.target.style.background = 'black'
-              } else if (this.yourBoxes[yPos][xPos] == this.OCCUPIED) {
+                return true
+              } else if (this.yourBoxes[yPos][xPos] == this.OCCUPIED && len==1) {
                 this.yourBoxes[yPos][xPos] = this.EMPTY
                 e.target.style.background = 'rgb(171, 212, 248)'
+              }else{
+                return false
               }
-             }
+            }
+          },
+
+          changeFieldToBlack: function(e){
+            let yPos = e.target.dataset.i
+            let xPos = e.target.dataset.j
+            this.yourBoxes[yPos][xPos] = this.OCCUPIED
+            e.target.style.background = 'black'
           },
 
           // Potwierdz ulozenie planszy
