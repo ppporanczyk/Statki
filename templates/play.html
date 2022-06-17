@@ -147,20 +147,9 @@
           setupListeners: function () {
             this.pusher.bind('client-' + this.username, (message) => {
               if (confirm('Użytkownik '+message + ' zaprasza cię do gry w statki, czy chcesz zagrać?')) {
-                this.otherPlayerName = message
-                this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
-                this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-                  this.otherPlayerChannel.trigger('client-set-ships', message)
-                })
-                this.saveToDB()
-                this.playerNum = 1
-                this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
+                this.acceptInvitation()
               } else {
-                this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
-                this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-                  this.otherPlayerChannel.trigger('client-game-declined', "")
-                })
-                this.gameDeclined()
+                this.declineInvitation()
               }
             })
 
@@ -214,6 +203,24 @@
             })
           },
 
+          acceptInvitation: function() {
+            this.otherPlayerName = message
+            this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
+            this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+              this.otherPlayerChannel.trigger('client-set-ships', message)
+            })
+            this.saveToDB()
+            this.playerNum = 1
+            this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
+          },
+
+          declineInvitation: function() {
+            this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
+            this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+              this.otherPlayerChannel.trigger('client-game-declined', "")
+            })
+            this.gameDeclined()
+          },
           // Wyslanie zaproszenia do gry
           choosePlayer: function (e) {
             this.otherPlayerName = e.target.innerText
