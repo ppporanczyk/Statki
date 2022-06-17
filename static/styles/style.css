@@ -356,3 +356,7 @@ form {
     font-weight: bold;
     color: #009879;
 }
+
+.counterShips{
+    display:inline-block;
+}
