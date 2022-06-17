@@ -1,25 +1,77 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<section>
-    <h1>Statystyki gier</h1>
-    <table class="stat_table">
-        <tr>
-            <td class="stat_td">Gry wygrane</td>
-            <td class="stat_td">{{games_won}}</td>
-        </tr>
-        <tr>
-            <td class="stat_td">Gry przegrane</td>
-            <td class="stat_td">{{games_lost}}</td>
-        </tr>
-        <tr>
-            <td class="stat_td">Gry w trakcie</td>
-            <td class="stat_td">{{games_in_progress}}</td>
-        </tr>
-    </table>
-</section>
-<section>
+<h1   style="display:inline-block">STTYSTYKI GIER</h1>
+<section class="button_previous" style="display:inline-block">
     <a href="javascript:history.back()" class="back_to_previous">Powrót do poprzedniej strony</a>
 </section>
+
+<div class="sections">
+    
+
+    <section>
+        <h2>Wszyscy użytkownicy</h2>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Numer</th>
+                    <th>Uzytkownik</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in all_users %}
+                <tr>
+                    <td>{{loop.index}}</td>
+                    <td>{{user.name}}</td>
+                    <td>{{user.email}}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+</section>   
+
+<section>
+    
+    <h2>Twoje gry</h2>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Gry wygrane</th>
+                <th>Gry przegrane</th>
+                <th>Gry w grakcie</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{games_won}}</td>
+                <td>{{games_lost}}</td>
+                <td>{{games_in_progress}}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Zalogowani użytkownicy</h2>
+    <table class="styled-table">
+        <thead>
+            <tr>
+                <th>Numer</th>
+                <th>Zalogowany uzytkownik</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in all_available_users %}
+            <tr>
+                <td>{{loop.index}}</td>
+                <td>{{user}}</td>
+            </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+</section>
+
+</div>
+
 {% endblock %}

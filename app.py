@@ -191,6 +191,26 @@ def get_games_in_progress_for_player_number(player_id):
     return len(Games.query.filter_by(player_1=player_id, result=0).all()) + len(
         Games.query.filter_by(player_2=player_id, result=0).all())
 
+def get_all_available_users():
+    users=Users.query.filter_by(status="available").all()
+    users_arr=[]
+    for user in users:
+        users_arr.append(user.name)
+    return users_arr
+
+def get_all__users():
+    users_query=Users.query.all()
+    # users_arr=[]
+    # for user in users_query:
+    #     users_arr.append(user.name)
+    return users_query
+
+def get_all_users_emails():
+    users_query=Users.query.all()
+    users_arr=[]
+    for user in users_query:
+        users_arr.append(user.email)
+    return users_arr
 
 @login_required
 @app.route('/profile')
@@ -198,7 +218,11 @@ def profile():
     return render_template('profile.html',
                            games_in_progress=get_games_in_progress_for_player_number(current_user.id),
                            games_won=get_games_won_for_player_number(current_user.id),
-                           games_lost=get_games_lost_for_player_number(current_user.id))
+                           games_lost=get_games_lost_for_player_number(current_user.id),
+                           all_available_users=get_all_available_users(),
+                           all_users=get_all__users(),
+                           all_users_emails=get_all_users_emails()
+                           )
 
 
 @app.route('/login', methods=['GET', 'POST'])
