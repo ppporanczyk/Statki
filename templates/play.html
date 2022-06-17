@@ -7,10 +7,12 @@
       <div class="col-8 h-10 ">
         <h2 class="p-4">Plansza przeciwnika</h2>
         <table class="row  rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem" ref="gameboard_main"
-          @click="playerAction">
+               @click="playerAction">
           <tr>
             <td class="h-100 pr-2 col border border-dark "></td>
-            {% for i in range(0,8) %}<td class="h-100 pr-2 col border border-dark">{{i+1}}</td>{%endfor%}
+            {% for i in range(0,8) %}
+            <td class="h-100 pr-2 col border border-dark">{{i+1}}</td>
+            {%endfor%}
           </tr>
           {% for i in range(0,8) %}
           <tr>
@@ -24,10 +26,12 @@
 
         <h2 class="p-4">Twoja plansza</h2>
         <table id="yourBoxes" class="row rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem"
-          ref="gameboard" @click="settingAction">
+               ref="gameboard" @click="settingAction">
           <tr>
             <td class="h-100 pr-2 col border border-dark"></td>
-            {% for i in range(0,8) %}<td class="h-100 pr-2 col border border-dark">{{i+1}}</td>{%endfor%}
+            {% for i in range(0,8) %}
+            <td class="h-100 pr-2 col border border-dark">{{i+1}}</td>
+            {%endfor%}
           </tr>
           {% for i in range(0,8) %}
           <tr>
@@ -44,25 +48,33 @@
           <div class="col h-75 text-center " style="background: rgb(99, 226, 135);">
             <p class="my-3">Witaj, {% raw %} {{ username }} {% endraw %} !!</p>
             <p class="my-3"> {% raw %} {{ players }} {% endraw %} gracz(y) online </p>
-            <hr />
+            <hr/>
             <div class="player-entry m-auto py-3 text-dark" style="cursor: pointer;" v-for="member in connectedPlayers"
-              @click="choosePlayer">
+                 @click="choosePlayer">
               {% raw %} {{ member }} {% endraw %}
             </div>
           </div>
+
           <div class="w-100 communicate">KOMUNIKATY</div>
           <div class="col text-center py-3  h-25 statuses" @click="confirmSetup"
-            style="cursor: pointer; background: #b6c0ca; font-size: 1em; font-weight: bold">
-            
+               style="cursor: pointer; background: #b6c0ca; font-size: 1em; font-weight: bold">
+
             {% raw %} {{ status }} {% endraw %}
+          </div>
+          <div class="w-100 communicate">ZAPROSZENIA</div>
+          <div class="col h-75 text-center " style="background: rgb(99, 226, 135);">
+            <div class="player-entry m-auto py-3 text-dark" style="cursor: pointer;" v-for="invitation in invitations">
+              {% raw %} {{ invitation }} {% endraw %}
+              <button @click="acceptInvitation(invitation)">Akceptuj</button>
+              <button @click="declineInvitation(invitation)">Odrzuć</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://js.pusher.com/4.2/pusher.min.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script>
+      <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+      <script src="https://js.pusher.com/4.2/pusher.min.js"></script>
+      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+      <script>
       Pusher.logToConsole = true;
       var app = new Vue({
 
@@ -79,9 +91,10 @@
           connectedPlayers: [],
           status: '',
           respond: 3,
-          pregame: 0,
+          pregame: false,
           playerNum: 2,
           opponentReady: false,
+          invitations: [],
           pusher: new Pusher('4d2726b6eaed69e2834f', {
             authEndpoint: '/pusher/auth',
             cluster: 'eu',
@@ -146,11 +159,7 @@
 
           setupListeners: function () {
             this.pusher.bind('client-' + this.username, (message) => {
-              if (confirm('Użytkownik '+message + ' zaprasza cię do gry w statki, czy chcesz zagrać?')) {
-                this.acceptInvitation()
-              } else {
-                this.declineInvitation()
-              }
+              this.invitations.push(message)
             })
 
             this.myChannel.bind('client-game-declined', () => {
@@ -172,7 +181,7 @@
               this.status = "Zaczynasz bitwe. Twój ruch!"
 
               this.turn = 1
-              this.pregame=0
+              this.pregame=false
             })
 
             this.myChannel.bind('client-shoot-on-position', (data) => {
@@ -203,7 +212,8 @@
             })
           },
 
-          acceptInvitation: function() {
+          acceptInvitation: function(message) {
+            console.log(message)
             this.otherPlayerName = message
             this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
             this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
@@ -211,14 +221,23 @@
             })
             this.saveToDB()
             this.playerNum = 1
+            const index = this.invitations.indexOf(message);
+            if (index > -1) {
+              this.invitations.splice(index, 1); // 2nd parameter means remove one item only
+            }
             this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
           },
 
-          declineInvitation: function() {
+          declineInvitation: function(message) {
+            console.log(message)
             this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
             this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
               this.otherPlayerChannel.trigger('client-game-declined', "")
             })
+            const index = this.invitations.indexOf(message);
+            if (index > -1) {
+              this.invitations.splice(index, 1); // 2nd parameter means remove one item only
+            }
             this.gameDeclined()
           },
           // Wyslanie zaproszenia do gry
@@ -238,7 +257,7 @@
           // Set ships on the map
           setShipsOnMap: function () {
             this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "
-            this.pregame=1
+            this.pregame=true
           },
 
           executePlayerAction: function (data) {
@@ -261,7 +280,7 @@
           settingAction: function (e) {
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
-            if(this.pregame==1){
+            if(this.pregame==true){
               console.log(yPos + ' ' + xPos + " " + this.yourBoxes[yPos][xPos])
               if (this.yourBoxes[yPos][xPos] == this.EMPTY) {
                 this.yourBoxes[yPos][xPos] = this.OCCUPIED
@@ -275,18 +294,20 @@
 
           // Potwierdz ulozenie planszy
           confirmSetup: function (e) {
-            if (this.opponentReady == false) {
-              this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
-            } else {
-              this.startGame()
-              this.otherPlayerChannel.trigger('client-game-started', "")
+            if(this.pregame == true) {
+              if (this.opponentReady == false) {
+                this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
+              } else {
+                this.startGame()
+                this.otherPlayerChannel.trigger('client-game-started', "")
+              }
             }
           },
 
           // rozpoczecie gry
           startGame: function () {
             this.status = "Gra rozpoczęta";
-            this.pregame=0
+            this.pregame=false
           },
 
           // Checks to see if the play was a winning play CHECK IF IT IS WORKING
@@ -390,8 +411,9 @@
           },
         }
      });
-    </script>
 
+      </script>
+
+    </div>
   </div>
-</div>
-{% endblock %}
+  {% endblock %}
