@@ -92,7 +92,13 @@ li>a {
     padding: 1rem 1rem 0.3rem 1rem !important;
 }
 .player-entry {
-    width: 5rem;
+    width: 6rem;
+    /* background-color: #3092fa; */
+    margin:0 auto;
+    border-radius: 25px;
+}
+.player-entry-invite {
+    width: 6rem;
     /* background-color: #3092fa; */
     margin:0 auto;
     border-radius: 25px;
@@ -374,17 +380,17 @@ form {
         height: 40px;
         line-height: 20px;
         list-style: none;
-        margin: 0;
+        margin: 0.2rem;
         outline: none;
         padding: 10px 16px;
         position: relative;
         text-align: center;
         text-decoration: none;
         transition: color 100ms;
-        vertical-align: baseline;
+        /* vertical-align: baseline;
         user-select: none;
         -webkit-user-select: none;
-        touch-action: manipulation;
+        touch-action: manipulation; */
 }
 .buttonChoice:hover,
 .buttonChoice:focus {

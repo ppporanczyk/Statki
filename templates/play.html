@@ -97,7 +97,7 @@
           </div>
           <div class="w-100 communicate">ZAPROSZENIA</div>
           <div class="col h-75 text-center " style="background: rgb(99, 226, 135);">
-            <div class="player-entry m-auto py-3 text-dark" style="cursor: pointer;" v-for="invitation in invitations">
+            <div class="player-entry-invite  py-3 " style="cursor: pointer;" v-for="invitation in invitations">
               {% raw %} {{ invitation }} {% endraw %}
               <button class="buttonChoice" @click="acceptInvitation(invitation)">Akceptuj</button>
             <button class="buttonChoice" @click="declineInvitation(invitation)">Odrzuć</button>
