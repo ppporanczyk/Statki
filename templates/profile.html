@@ -16,17 +16,27 @@
                 <tr>
                     <th>Numer</th>
                     <th>Uzytkownik</th>
-                    <th>Gry wygrane / gry przegrane</th>
+                    <th>Gry wygrane</th>
                 </tr>
             </thead>
             <tbody>
-                {% for user in all_users %}
+                <!-- {% for user in all_users %}
                 <tr>
                     <td>{{loop.index}}</td>
                     <td>{{user.name}}</td>
-                    <td>{{user.email}}</td>
+                    <td>{{games_won_for_all_players}}/{{games_lost}}</td>
                 </tr>
-                {%endfor%}
+                {%endfor%} -->
+
+                {% for dict_item in games_won_for_all_players %}
+                    {% for key, value in dict_item.items() %}
+                        <tr>
+                            <td>{{loop.index}}</td>
+                            <td>{{key}}</td>
+                            <td>{{value}}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
             </tbody>
         </table>
 </section>   
@@ -37,12 +47,14 @@
     <table class="styled-table">
         <thead>
             <tr>
+                <th>Uzytkownik</th>
                 <th>Gry wygrane</th>
                 <th>Gry przegrane</th>
             </tr>
         </thead>
         <tbody>
             <tr>
+                <td>{{get_curent_user}}</td>
                 <td>{{games_won}}</td>
                 <td>{{games_lost}}</td>
             </tr>
@@ -51,21 +63,19 @@
 </section>
 
 <section>
-    <h3>Dostępni gracze</h3>
+    <h3>Inne</h3>
     <table class="styled-table">
         <thead>
             <tr>
-                <th>Numer</th>
-                <th>Zalogowany uzytkownik</th>
+                <th>Ostatnio grałeś z </th>
+                <th>Najczęsciej grasz z</th>
             </tr>
         </thead>
         <tbody>
-            {% for user in all_available_users %}
             <tr>
-                <td>{{loop.index}}</td>
-                <td>{{user}}</td>
+                <td>{{last_game_with.name}}</td>
+                <td>{{last_game_numbers.name}}</td>
             </tr>
-            {%endfor%}
         </tbody>
     </table>
 </section>

@@ -180,6 +180,34 @@ def get_games_won_for_player_number(player_id):
     return len(Games.query.filter_by(player_1=player_id, result=1).all()) + len(
         Games.query.filter_by(player_2=player_id, result=2).all())
 
+def last_game_with(player_id):
+    other_player= Games.query.filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()[0]
+    other_player_id=other_player.player_2
+    return Users.query.get(other_player_id)
+
+def last_game_numbers(player_id):
+
+    last_orders = db.session.query(
+    Games.player_2, db.func.count(Games.player_2).label('mycount')).filter_by(player_1=player_id).group_by(Games.player_2).order_by('mycount').limit(1).all()[0] #.subquery()
+
+    return Users.query.get(last_orders.player_2)
+
+def get_games_won_for_players():
+    arr=[]
+    arr1=[]
+    arr2=[]
+    counter=Users.query.order_by(Users.name.asc()).all()
+    for elem in counter:
+        arr2.append(elem.name)
+
+    for elem in counter:
+        arr1.append( len(Games.query.filter_by(player_1=elem.id, result=1).all()) + len(
+            Games.query.filter_by(player_2=elem.id, result=2).all()))
+    dictionary = dict(zip(arr2, arr1))
+    arr.append(dictionary)
+    return arr
+
+
 
 def get_games_lost_for_player_number(player_id):
     return len(Games.query.filter_by(player_1=player_id, result=2).all()) + len(
@@ -197,11 +225,11 @@ def get_all_available_users():
         users_arr.append(user.name)
     return users_arr
 
+def get_current_user(current_user):
+    return current_user.name
+
 def get_all__users():
     users_query=Users.query.all()
-    # users_arr=[]
-    # for user in users_query:
-    #     users_arr.append(user.name)
     return users_query
 
 def get_all_users_emails():
@@ -220,7 +248,11 @@ def profile():
                            games_lost=get_games_lost_for_player_number(current_user.id),
                            all_available_users=get_all_available_users(),
                            all_users=get_all__users(),
-                           all_users_emails=get_all_users_emails()
+                           all_users_emails=get_all_users_emails(),
+                           get_curent_user=get_current_user(current_user),
+                           games_won_for_all_players=get_games_won_for_players(),
+                           last_game_with=last_game_with(current_user.id),
+                           last_game_numbers=last_game_numbers(current_user.id)
                            )
 
 
@@ -256,7 +288,6 @@ def forget_password():
 
             # tu zmieniamy hasło w bazie
             user = Users.query.filter_by(email=form.email.data).first()
-            # user.password = new_password
             user.set_password(new_password)
             db.session.commit()
             flash(f"Wysłano mail na adres: {form.email.data}")
