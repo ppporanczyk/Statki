@@ -71,7 +71,7 @@
           <tr>
             <td class="h-100 pr-2 col border border-dark">{{ alphabet[i]}}</td>
             {% for j in range(0,8) %}
-            <td class="col pr-2 border border-dark" data-i="{{ i }}" data-j="{{ j }}"></td>
+            <td class="col pr-2 border border-dark" id="pos{{ i }}{{ j }}" data-i="{{ i }}" data-j="{{ j }}"></td>
             {%endfor%}
           </tr>
           {%endfor%}
@@ -222,11 +222,16 @@
             })
 
             this.myChannel.bind('client-shoot-on-position', (data) => {
-              this.getValueOnPos(data['yPos'], data['xPos']);
-              if(yourBoxes[data['yPos']][data['xPos']] == this.OCCUPIED) {
-                yourBoxes[data['yPos']][data['xPos']] = this.DESTROYED_SHIP
+              let yPos = data['yPos']
+              let xPos = data['xPos']
+              this.getValueOnPos(yPos, xPos);
+              let field = document.getElementById("pos" + yPos + xPos)
+              if(this.yourBoxes[yPos][xPos] == this.OCCUPIED) {
+                this.yourBoxes[yPos][xPos] = this.DESTROYED_SHIP
+                field.style.background = "red"
               } else {
-                yourBoxes[data['yPos']][data['xPos']] = this.MISSED
+                this.yourBoxes[yPos][xPos] = this.MISSED
+                field.style.background = "orange"
               }
             })
 
@@ -437,16 +442,10 @@
           },
 
           getValueOnPos: function (yPos, xPos) {
-            let value = this.yourBoxes[yPos][xPos]
-            if (value == this.OCCUPIED) {
-              this.yourBoxes[yPos][xPos] = this.DESTROYED_SHIP
-            } else {
-              this.yourBoxes[yPos][xPos] = this.MISSED
-            }
             this.otherPlayerChannel.trigger('client-return-value', {
               "yPos": yPos,
               "xPos": xPos,
-              "value": value
+              "value": this.yourBoxes[yPos][xPos]
             })
           },
 
