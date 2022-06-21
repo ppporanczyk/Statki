@@ -409,6 +409,7 @@
             if(this.pregame == true) {
               if (this.opponentReady == false) {
                 this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
+                this.status = "Oczekiwanie na przeciwnika"
               } else {
                 this.startGame()
                 this.otherPlayerChannel.trigger('client-game-started', "")
