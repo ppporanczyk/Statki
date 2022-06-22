@@ -24,43 +24,44 @@
           </tr>
           {%endfor%}
         </table>
-        <!-- <div class="counterShips w-25 ml-5">
-          <p>Licznik statkow do rozlozenia</p>
-          <p>4-masztowce {% raw %} {{ ship4Len }}{% endraw %}</p>
-          <p>3-masztowce {% raw %} {{ ship3Len }}{% endraw %}</p>
-          <p>2-masztowce {% raw %} {{ ship2Len }}{% endraw %}</p>
-          <p>1-masztowce {% raw %} {{ ship1Len }}{% endraw %}</p>
-        </div> -->
 
         <table class="styled-table counterShips w-30 ml-5">
           <thead>
               <tr>
                   <th>Statki do rozłożenia</th>
-                  <th>Ilosc</th>
+                  <th>Ilość</th>
               </tr>
           </thead>
           <tbody>
               <tr>
                   <td>4-masztowce</td>
-                  <td>{% raw %} {{ ship4Len }}{% endraw %}</td>
+                  <td>{% raw %} {{ numShip[3] }}{% endraw %}</td>
               </tr>
               <tr>
-                <td>3-masztowce</td>
-                <td>{% raw %} {{ ship3Len }}{% endraw %}</td>
-            </tr>
-            <tr>
-              <td>2-masztowce</td>
-              <td>{% raw %} {{ ship2Len }}{% endraw %}</td>
-          </tr>
-          <tr>
-            <td>1-masztowce</td>
-            <td>{% raw %} {{ ship1Len }}{% endraw %}</td>
-        </tr>
+                  <td>3-masztowce</td>
+                  <td>{% raw %} {{ numShip[2] }}{% endraw %}</td>
+              </tr>
+              <tr>
+                  <td>2-masztowce</td>
+                  <td>{% raw %} {{ numShip[1] }}{% endraw %}</td>
+              </tr>
+              <tr>
+                  <td>1-masztowce</td>
+                  <td>{% raw %} {{ numShip[0] }}{% endraw %}</td>
+              </tr>
+              <tr>
+                  <td>Punkty</td>
+                  <td>{% raw %} {{ points }}{% endraw %}</td>
+              </tr>
+              <tr>
+                  <td>Punkty przeciwnika</td>
+                  <td>{% raw %} {{ enemyPoints }}{% endraw %}</td>
+              </tr>
           </tbody>
       </table>
         <h2 class="p-4">Twoja plansza</h2>
         <table id="yourBoxes" class="row rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem"
-          ref="gameboard" @mouseout="selectInRange" @mousedown="selectFrom" @mouseup="selectTo" ><!--@click="settingAction"-->
+          ref="gameboard" @mouseout="buildNewShip" @mousedown="initNewShip" @mouseup="saveNewShip" >
           <tr>
             <td class="h-100 pr-2 col border border-dark"></td>
             {% for i in range(0,8) %}
@@ -120,7 +121,6 @@
           DESTROYED_SHIP: 1,
           MISSED: -1,
           EMPTY: 0,
-          OCCUPIED: 2,
           players: 0,
           connectedPlayers: [],
           status: '',
@@ -160,11 +160,17 @@
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0]
           ],
-          clickedFrom: 0,
-          ship4Len: 1,
-          ship3Len: 2,
-          ship2Len: 3,
-          ship1Len: 4,
+          newShipFields: 0,
+          points: 0,
+          enemyPoints: 0,
+          numShip: new Array(4,3,2,1),
+          STOCKED: 10,
+          SET: 11,
+          SUNK: 12,
+          shipFleet: [[10,10,10,10],
+                  [10,10,10],
+                  [10,10],
+                  [10]]
         },
 
         created() {
@@ -226,7 +232,8 @@
               let xPos = data['xPos']
               this.getValueOnPos(yPos, xPos);
               let field = document.getElementById("pos" + yPos + xPos)
-              if(this.yourBoxes[yPos][xPos] == this.OCCUPIED) {
+              if(this.yourBoxes[yPos][xPos] instanceof Array) {
+
                 this.yourBoxes[yPos][xPos] = this.DESTROYED_SHIP
                 field.style.background = "red"
               } else {
@@ -268,7 +275,7 @@
               if (index > -1) {
                 this.invitations.splice(index, 1); // 2nd parameter means remove one item only
               }
-              this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
+              this.setShipsOnMap()
               this.gameActive = true
             }
           },
@@ -285,7 +292,7 @@
             }
             this.gameDeclined()
           },
-          // Wyslanie zaproszenia do gry
+
           choosePlayer: function (e) {
             this.otherPlayerName = e.target.innerText
             this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
@@ -294,24 +301,44 @@
             });
           },
 
-          // Gracz odmowil rozgrywki
           gameDeclined: function () {
           },
 
-          // Set ships on the map
           setShipsOnMap: function () {
             this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "
             this.pregame=true
+          },
+
+          addBonusPoints: function (lenShip){
+            var result = 0
+            if(lenShip==2){
+                result = 3
+            }else if(lenShip==3){
+                result = 7
+            }else if(lenShip==4){
+                result = 13
+            }
+            return result
           },
 
           executePlayerAction: function (data) {
             let yPos = data['yPos'];
             let xPos = data['xPos'];
             let value = data['value'];
-            if (value == this.OCCUPIED) {
+            let status = data['status'];
+            this.enemyPoints = data['enemyPoints']
+            if (value instanceof Array) {
               this.mainBoxes[yPos][xPos] = this.DESTROYED_SHIP
               this.currentEvent.target.style.background = 'green'
+              this.points += 1
               this.turn = 1
+              if(status =='Trafiony zatopiony!'){
+                this.points += this.addBonusPoints(yPos +1)
+                this.turn = 0
+                this.status = status + " Teraz ruch przeciwnika!"
+                this.otherPlayerChannel.trigger('client-your-turn', "")
+              }
+
             } else {
               this.mainBoxes[yPos][xPos] = this.MISSED
               this.currentEvent.target.style.background = 'red'
@@ -320,61 +347,105 @@
             }
           },
 
-          selectFrom: function(e) {
+          initNewShip: function(e) {
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
-            this.clickedFrom = [e]
+            this.newShipFields = [e]
           },
 
-          selectInRange: function(e) {
-            if(this.clickedFrom !=0){
+          buildNewShip: function(e) {
+            if(this.newShipFields !=0){
               let yPos = e.target.dataset.i
               let xPos = e.target.dataset.j
               console.log(yPos + ' ' + xPos)
-              this.clickedFrom.push(e)
-
+              this.newShipFields.push(e)
              }
           },
 
-          selectTo: function(e) {
-            if(this.clickedFrom !=0){
-              let yPos = e.target.dataset.i
-              let xPos = e.target.dataset.j
-              this.clickedFrom.push(e)
-              var clickedFields = this.clickedFrom.slice();
+          isStraight: function(clickedFields){
+              if(clickedFields.length==1){
+                    return true
+              }
+              var firstYPos = clickedFields[0].target.dataset.i
+              var firstXPos = clickedFields[0].target.dataset.j
+
+              if(clickedFields.every(e => e.target.dataset.i == firstYPos)){
+                 var xPoses = clickedFields.map(e => e.target.dataset.j)
+                 const unique = xPoses.filter((x, i, a) => a.indexOf(x) == i)
+                 return unique.length == clickedFields.length
+              }else if(clickedFields.every(e => e.target.dataset.j == firstXPos)){
+                 var yPoses = clickedFields.map(e => e.target.dataset.i)
+                 const unique = yPoses.filter((x, i, a) => a.indexOf(x) == i)
+                 return unique.length == clickedFields.length
+              }
+              return false
+          },
+
+
+          getFirstAvailableShipID: function(length){
+            if(this.shipFleet[length-1].includes(this.STOCKED)){
+             return [length-1,this.shipFleet[length-1].indexOf(this.STOCKED)]
+            }else{
+             return false
+            }
+          },
+
+          deleteShipMasted: function(shipID){
+            this.shipFleet[shipID[0]][shipID[1]]=this.STOCKED
+            this.numShip[shipID[0]] = this.numShip[shipID[0]]+1
+            for (var i = 0; i < 8; i++) {
+              for (var j = 0; j < 8; j++) {
+                if (this.yourBoxes[i][j] == shipID) {
+                  console.log("SHIPID "+ shipID)
+                  this.yourBoxes[i][j] = this.EMPTY
+                  let field = document.getElementById("pos" + i + j)
+                  field.style.background = 'rgb(171, 212, 248)'
+                }
+              }
+            }
+          },
+
+          isHitAndSunk: function(shipID){
+            for (var i = 0; i < 8; i++) {
+              for (var j = 0; j < 8; j++) {
+                if (this.yourBoxes[i][j] == shipID) {
+                  return false
+                }
+              }
+            }
+            this.shipFleet[shipID[0]][shipID[1]]=this.SUNK
+            return true
+          },
+
+          saveNewShip: function(e) {
+            if(this.newShipFields !=0){
+              this.newShipFields.push(e)
+              var clickedFields = this.newShipFields.slice();
               clickedFields.shift()
-              this.clickedFrom = 0
+              this.newShipFields = 0
+
               if(clickedFields.length<5){
                 var result =true
+                if(this.isStraight(clickedFields)==false){
+                  return 0
+                }
                 for (let i = 0; i < clickedFields.length; i++){
                   result = this.settingAction(clickedFields[i], clickedFields.length);
                   if(result==false){
                     break
                   }
                 }
+
                 if(result==true){
-                  if(clickedFields.length==4 && this.ship4Len!=0){
-                    this.ship4Len = this.ship4Len-1
+                  if(this.numShip[clickedFields.length-1]!=0){
+                    var shipID = this.getFirstAvailableShipID(clickedFields.length)
+                    this.shipFleet[shipID[0]][shipID[1]]=this.SET
+                    this.numShip[shipID[0]] = this.numShip[shipID[0]]-1
+                    var color = "rgb(" + Math.floor(Math.random() * 170) + ",0,0)"
                     for (let i = 0; i < clickedFields.length; i++){
-                      this.changeFieldToBlack(clickedFields[i])
+                      this.setShipOnBoard(clickedFields[i], shipID,color)
                     }
-                  }else if(clickedFields.length==3 && this.ship3Len!=0){
-                    this.ship3Len = this.ship3Len-1
-                    for (let i = 0; i < clickedFields.length; i++){
-                      this.changeFieldToBlack(clickedFields[i])
-                    }
-                  }else if(clickedFields.length==2 && this.ship2Len!=0){
-                    this.ship2Len = this.ship2Len-1
-                    for (let i = 0; i < clickedFields.length; i++){
-                      this.changeFieldToBlack(clickedFields[i])
-                    }
-                  }else if(clickedFields.length==1 && this.ship1Len!=0){
-                    this.ship1Len = this.ship1Len-1
-                    for (let i = 0; i < clickedFields.length; i++){
-                      this.changeFieldToBlack(clickedFields[i])
-                    }
-                  }
-                  else{
+                  }else{
                     return 0
                   }
                 }
@@ -382,7 +453,6 @@
             }
           },
 
-          // Ustawianie statkow + Dodac walidacje rozstawiania
           settingAction: function (e, len) {
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
@@ -390,25 +460,24 @@
               console.log(yPos + ' ' + xPos + " " + this.yourBoxes[yPos][xPos])
               if (this.yourBoxes[yPos][xPos] == this.EMPTY) {
                 return true
-              } else if (this.yourBoxes[yPos][xPos] == this.OCCUPIED && len==1) {
-                this.yourBoxes[yPos][xPos] = this.EMPTY
-                e.target.style.background = 'rgb(171, 212, 248)'
+              } else if (this.yourBoxes[yPos][xPos] != this.EMPTY && len==1) {
+                this.deleteShipMasted(this.yourBoxes[yPos][xPos])
               }else{
                 return false
               }
             }
           },
 
-          changeFieldToBlack: function(e){
+          setShipOnBoard: function(e, shipID, color){
+          console.log("SHIPSSS "+ shipID)
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
-            this.yourBoxes[yPos][xPos] = this.OCCUPIED
-            e.target.style.background = 'black'
+            this.yourBoxes[yPos][xPos] = shipID
+            e.target.style.background = color
           },
 
-          // Potwierdz ulozenie planszy
           confirmSetup: function (e) {
-            if(this.pregame == true) {
+            if(this.pregame == true && this.numShip.every(el => el === 0) ) {
               if (this.opponentReady == false) {
                 this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
                 this.status = "Oczekiwanie na przeciwnika"
@@ -419,7 +488,6 @@
             }
           },
 
-          // rozpoczecie gry
           startGame: function () {
             this.status = "Gra rozpoczęta";
             this.pregame=false
@@ -445,18 +513,30 @@
           },
 
           getValueOnPos: function (yPos, xPos) {
+            let value = this.yourBoxes[yPos][xPos]
+            if (value instanceof Array) {
+              this.yourBoxes[yPos][xPos] = this.DESTROYED_SHIP
+            } else {
+              this.yourBoxes[yPos][xPos] = this.MISSED
+            }
+            var status = "Twój ruch"
+            if(this.isHitAndSunk(value)){
+                status = "Trafiony zatopiony!"
+            }
             this.otherPlayerChannel.trigger('client-return-value', {
               "yPos": yPos,
               "xPos": xPos,
-              "value": this.yourBoxes[yPos][xPos]
+              "value": value,
+              "status": status,
+              "enemyPoints": this.points,
+
             })
           },
 
-          // sprawdza, czy wszystkie statki zostaly znalezione
           areAllPlayerShipsDestroyed: function () {
-            for (var i = 0; i < 8; i++) {
-              for (var j = 0; j < 8; j++) {
-                if (this.yourBoxes[i][j] == this.OCCUPIED) {
+            for (var i = 0; i < 4; i++) {
+              for (var j = 0; j < this.shipFleet[i].length; j++) {
+                if (this.shipFleet[i][j] != this.SUNK) {
                   return false
                 }
               }
@@ -464,14 +544,12 @@
             return true
           },
 
-          // Obecny gracz wygrywa
           gameWon: function () {
             this.status = "Wygrałeś!"
             this.gameResult = 1
             this.updateStatusGameToDB()
           },
 
-          // Obecny gracz przegrywa
           gameLost: function () {
             this.status = "Przegrałeś!"
             this.gameResult = 2
@@ -481,6 +559,10 @@
             this.gameActive = false
             this.$refs.gameboard_main.classList.add('invisible');
             this.$refs.gameboard.classList.add('invisible');
+            this.points = 0
+            this.enemyPoints = 0
+            this.shipFleet = [[10,10,10,10],[10,10,10],[10,10],[10]]
+            this.numShip= new Array(4,3,2,1)
             for (i = 0; i < 8; i++) {
               for (j = 0; j < 8; j++) {
                 this.mainBoxes[i][j] = this.EMPTY;
@@ -511,6 +593,7 @@
             const path = '/rooms';
             await axios.put(path,{
               playerNum: this.playerNum,
+              points: this.points - this.enemyPoints,
             },config)
             .then(response => {
                 console.log(response)

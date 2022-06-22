@@ -146,8 +146,9 @@ def end_game():
     if request.method == "PUT":
         result = request.get_json()
         player = result.get('playerNum')
+        points = result.get('points')
         sql_insert_one = text(
-            f"UPDATE  games SET result={player}, status=2   WHERE status=1 AND player_{player}='{current_user.id}';")
+            f"UPDATE games SET result={player}, status=2, points={points} WHERE status=1 AND player_{player}='{current_user.id}';")
         print(sql_insert_one)
         db.session.execute(sql_insert_one)
 
