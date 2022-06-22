@@ -233,6 +233,7 @@
               this.getValueOnPos(yPos, xPos);
               let field = document.getElementById("pos" + yPos + xPos)
               if(this.yourBoxes[yPos][xPos] instanceof Array) {
+
                 this.yourBoxes[yPos][xPos] = this.DESTROYED_SHIP
                 field.style.background = "red"
               } else {
@@ -481,6 +482,7 @@
             if(this.pregame == true && this.numShip.every(el => el === 0) ) {
               if (this.opponentReady == false) {
                 this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
+                this.status = "Oczekiwanie na przeciwnika"
               } else {
                 this.startGame()
                 this.otherPlayerChannel.trigger('client-game-started', "")
@@ -529,6 +531,7 @@
               "value": value,
               "status": status,
               "enemyPoints": this.points,
+
             })
           },
 
