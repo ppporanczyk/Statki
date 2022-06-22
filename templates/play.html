@@ -124,6 +124,7 @@
           players: 0,
           connectedPlayers: [],
           status: '',
+          gameActive: false,
           respond: 3,
           pregame: false,
           playerNum: 2,
@@ -202,7 +203,6 @@
             })
 
             this.myChannel.bind('client-game-declined', () => {
-              this.status = "Odmowa udziału w grze"
             })
 
             this.myChannel.bind('client-set-ships', (message) => {
@@ -256,18 +256,21 @@
 
           acceptInvitation: function(message) {
             console.log(message)
-            this.otherPlayerName = message
-            this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
-            this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-              this.otherPlayerChannel.trigger('client-set-ships', message)
-            })
-            this.saveToDB()
-            this.playerNum = 1
-            const index = this.invitations.indexOf(message);
-            if (index > -1) {
-              this.invitations.splice(index, 1); // 2nd parameter means remove one item only
+            if(this.gameActive == false) {
+              this.otherPlayerName = message
+              this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
+              this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                this.otherPlayerChannel.trigger('client-set-ships', message)
+              })
+              this.saveToDB()
+              this.playerNum = 1
+              const index = this.invitations.indexOf(message);
+              if (index > -1) {
+                this.invitations.splice(index, 1); // 2nd parameter means remove one item only
+              }
+              this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
+              this.gameActive = true
             }
-            this.setShipsOnMap() //ETAP ROZSTAWIANIA STATKOW, DODAC WALIDACJE ROZSTAWIANIA I LIMITY
           },
 
           declineInvitation: function(message) {
@@ -293,7 +296,6 @@
 
           // Gracz odmowil rozgrywki
           gameDeclined: function () {
-            this.status = "Nie przyjęto zaproszenia"
           },
 
           // Set ships on the map
@@ -476,6 +478,7 @@
           },
 
           restartGame: function () {
+            this.gameActive = false
             this.$refs.gameboard_main.classList.add('invisible');
             this.$refs.gameboard.classList.add('invisible');
             for (i = 0; i < 8; i++) {
