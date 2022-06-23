@@ -118,15 +118,15 @@ def main_page():
     return render_template('index.html')
 
 
-@login_required
 @app.route('/rooms')
+@login_required
 def play():
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     return render_template('play.html', name=current_user.name, alphabet=alphabet)
 
 
-@login_required
 @app.route('/rooms', methods=["POST"])
+@login_required
 def new_game_init():
     if request.method == "POST":
         result = request.get_json()
@@ -140,8 +140,8 @@ def new_game_init():
     return response_object
 
 
-@login_required
 @app.route('/rooms', methods=["PUT"])
+@login_required
 def end_game():
     if request.method == "PUT":
         result = request.get_json()
@@ -240,8 +240,8 @@ def get_all_users_emails():
         users_arr.append(user.email)
     return users_arr
 
-@login_required
 @app.route('/profile')
+@login_required
 def profile():
     return render_template('profile.html',
                            games_in_progress=get_games_in_progress_for_player_number(current_user.id),
