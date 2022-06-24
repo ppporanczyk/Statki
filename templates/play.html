@@ -7,7 +7,7 @@
       <div class="col-8 h-10 ">
 
         <h2 class="p-4 w-75">Plansza przeciwnika</h2>
-        <table class="row  rounded visible h-20 w-20 m-auto " style="font-size: 1.2rem;display:inline-block;" ref="gameboard_main"
+        <table class="row  rounded visible h-20 w-20 m-auto " style="font-size: 1.2rem; display:inline-block; user-select: none;" ref="gameboard_main"
           @click="playerAction">
           <tr>
             <td class="h-100 pr-2 col border border-dark "></td>
@@ -60,7 +60,7 @@
           </tbody>
       </table>
         <h2 class="p-4">Twoja plansza</h2>
-        <table id="yourBoxes" class="row rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem"
+        <table id="yourBoxes" class="row rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem; user-select: none;"
           ref="gameboard" @mouseout="buildNewShip" @mousedown="initNewShip" @mouseup="saveNewShip" >
           <tr>
             <td class="h-100 pr-2 col border border-dark"></td>
