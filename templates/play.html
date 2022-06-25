@@ -7,7 +7,7 @@
       <div class="col-8 h-10 ">
 
         <h2 class="p-4 w-75">Plansza przeciwnika</h2>
-        <table class="row  rounded visible h-20 w-20 m-auto " style="font-size: 1.2rem;display:inline-block;" ref="gameboard_main"
+        <table class="row  rounded visible h-20 w-20 m-auto " style="font-size: 1.2rem; display:inline-block; user-select: none;" ref="gameboard_main"
           @click="playerAction">
           <tr>
             <td class="h-100 pr-2 col border border-dark "></td>
@@ -60,7 +60,7 @@
           </tbody>
       </table>
         <h2 class="p-4">Twoja plansza</h2>
-        <table id="yourBoxes" class="row rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem"
+        <table id="yourBoxes" class="row rounded visible h-20 w-20 m-auto" style="font-size: 1.2rem; user-select: none;"
           ref="gameboard" @mouseout="buildNewShip" @mousedown="initNewShip" @mouseup="saveNewShip" >
           <tr>
             <td class="h-100 pr-2 col border border-dark"></td>
@@ -124,6 +124,7 @@
           players: 0,
           connectedPlayers: [],
           status: '',
+          gameActive: false,
           respond: 3,
           pregame: false,
           playerNum: 2,
@@ -208,17 +209,14 @@
             })
 
             this.myChannel.bind('client-game-declined', () => {
-              this.status = "Odmowa udziału w grze"
             })
 
             this.myChannel.bind('client-set-ships', (message) => {
               this.setShipsOnMap()
             })
 
-            this.myChannel.bind('client-is-ready', (boxes) => {
+            this.myChannel.bind('client-is-ready', (nothing) => {
               this.opponentReady = true;
-              this.enemyBoxes = boxes
-              console.log(this.enemyBoxes)
             })
 
             this.myChannel.bind('client-game-started', (message) => {
@@ -263,18 +261,21 @@
 
           acceptInvitation: function(message) {
             console.log(message)
-            this.otherPlayerName = message
-            this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
-            this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
-              this.otherPlayerChannel.trigger('client-set-ships', message)
-            })
-            this.saveToDB()
-            this.playerNum = 1
-            const index = this.invitations.indexOf(message);
-            if (index > -1) {
-              this.invitations.splice(index, 1); // 2nd parameter means remove one item only
+            if(this.gameActive == false) {
+              this.otherPlayerName = message
+              this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
+              this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                this.otherPlayerChannel.trigger('client-set-ships', message)
+              })
+              this.saveToDB()
+              this.playerNum = 1
+              const index = this.invitations.indexOf(message);
+              if (index > -1) {
+                this.invitations.splice(index, 1); // 2nd parameter means remove one item only
+              }
+              this.setShipsOnMap()
+              this.gameActive = true
             }
-            this.setShipsOnMap()
           },
 
           declineInvitation: function(message) {
@@ -299,11 +300,10 @@
           },
 
           gameDeclined: function () {
-            this.status = "Nie przyjęto zaproszenia"
           },
 
           setShipsOnMap: function () {
-            this.status = "Ustaw statki na planszy. Kliknij tutaj, gdy bedziesz gotowy "
+            this.status = "Ustaw statki na planszy. Kliknij na planszę i przeciągnij aby ustawić statek danej długości. Kliknij tutaj, gdy będziesz gotowy "
             this.pregame=true
           },
 
@@ -478,7 +478,7 @@
           confirmSetup: function (e) {
             if(this.pregame == true && this.numShip.every(el => el === 0) ) {
               if (this.opponentReady == false) {
-                this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
+                this.otherPlayerChannel.trigger('client-is-ready', "")
                 this.status = "Oczekiwanie na przeciwnika"
               } else {
                 this.startGame()
@@ -555,6 +555,7 @@
           },
 
           restartGame: function () {
+            this.gameActive = false
             this.$refs.gameboard_main.classList.add('invisible');
             this.$refs.gameboard.classList.add('invisible');
             this.points = 0
