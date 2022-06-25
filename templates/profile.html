@@ -67,13 +67,17 @@
     <table class="styled-table">
         <thead>
             <tr>
-                <th>Ostatnio grałeś z </th>
+                <th>Ostatnio grałeś z</th>
+                <th>Status ostatniej gry</th>
+                <th>Przewaga punktowa wygranego</th>
                 <th>Najczęsciej grasz z</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>{{last_game_with.name}}</td>
+                <td>{{status_game}}</td>
+                <td>{{points_from_last_game}}</td>
                 <td>{{last_game_numbers.name}}</td>
             </tr>
         </tbody>

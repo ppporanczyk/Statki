@@ -29,11 +29,11 @@ pusher = pusher_client = pusher.Pusher(
     ssl=True
 )
 name = ''
-# app.config[
-    # 'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
-
 app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:1234@localhost:5432/postgres'
+    'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
+
+# app.config[
+#     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:1234@localhost:5432/postgres'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -192,6 +192,27 @@ def last_game_with(player_id):
     other_player_id=other_player.player_2
     return Users.query.get(other_player_id)
 
+def points_from_last_game(player_id):
+    points_query= Games.query.with_entities(Games.points).filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
+    points_list=points_query[0]
+    points=points_list[0]
+    if points==0:
+        points_query= Games.query.with_entities(Games.points).filter_by(player_2=player_id).order_by(Games.id.desc()).limit(1).all()
+        points_list=points_query[0]
+        points=points_list[0]
+    return points
+
+def status_game(player_id):
+    status_query= Games.query.with_entities(Games.status).filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
+    status_list=status_query[0]
+    status=status_list[0]
+    str=''
+    if status==1:
+        str='Wygrana'
+    else:
+        str='Przegrana'
+    return str
+
 def last_game_numbers(player_id):
     last_orders = db.session.query(Games.player_2,
                                    db.func.count(Games.player_2).label('mycount')).filter_by(player_1=player_id).group_by(Games.player_2).order_by('mycount').limit(1).all() #.subquery()
@@ -264,7 +285,9 @@ def profile():
                            get_curent_user=get_current_user(current_user),
                            games_won_for_all_players=get_games_won_for_players(),
                            last_game_with=last_game_with(current_user.id),
-                           last_game_numbers=last_game_numbers(current_user.id)
+                           last_game_numbers=last_game_numbers(current_user.id),
+                           points_from_last_game=points_from_last_game(current_user.id),
+                           status_game=status_game(current_user.id)
                            )
 
 
