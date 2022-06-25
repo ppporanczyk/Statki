@@ -29,11 +29,11 @@ pusher = pusher_client = pusher.Pusher(
     ssl=True
 )
 name = ''
-app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
-
 # app.config[
-#     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:1234@localhost:5432/postgres'
+    # 'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
+
+app.config[
+    'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:1234@localhost:5432/postgres'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -182,15 +182,26 @@ def get_games_won_for_player_number(player_id):
         Games.query.filter_by(player_2=player_id, result=2).all())
 
 def last_game_with(player_id):
-    other_player= Games.query.filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()[0]
+    other_player= Games.query.filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
+    if(len(other_player) < 1):
+        class ob:
+            name = "N/A"
+        return ob()
+    else:
+        other_player = other_player[0]
     other_player_id=other_player.player_2
     return Users.query.get(other_player_id)
 
 def last_game_numbers(player_id):
-
-    last_orders = db.session.query(
-    Games.player_2, db.func.count(Games.player_2).label('mycount')).filter_by(player_1=player_id).group_by(Games.player_2).order_by('mycount').limit(1).all()[0] #.subquery()
-
+    last_orders = db.session.query(Games.player_2,
+                                   db.func.count(Games.player_2).label('mycount')).filter_by(player_1=player_id).group_by(Games.player_2).order_by('mycount').limit(1).all() #.subquery()
+    print(last_orders)
+    if(len(last_orders) < 1):
+        class ob:
+            name = "N/A"
+        return ob()
+    else:
+        last_orders = last_orders[0]
     return Users.query.get(last_orders.player_2)
 
 def get_games_won_for_players():
