@@ -229,15 +229,7 @@
               let yPos = data['yPos']
               let xPos = data['xPos']
               this.getValueOnPos(yPos, xPos);
-              let field = document.getElementById("pos" + yPos + xPos)
-              if(this.yourBoxes[yPos][xPos] instanceof Array) {
 
-                this.yourBoxes[yPos][xPos] = this.DESTROYED_SHIP
-                field.style.background = "red"
-              } else {
-                this.yourBoxes[yPos][xPos] = this.MISSED
-                field.style.background = "orange"
-              }
             })
 
             this.myChannel.bind('client-return-value', data => this.executePlayerAction(data))
@@ -331,12 +323,11 @@
               this.points += 1
               this.turn = 1
               if(status =='Trafiony zatopiony!'){
-                this.points += this.addBonusPoints(yPos +1)
+                this.points += this.addBonusPoints(value[0] +1)
                 this.turn = 0
                 this.status = status + " Teraz ruch przeciwnika!"
                 this.otherPlayerChannel.trigger('client-your-turn', "")
               }
-
             } else {
               this.mainBoxes[yPos][xPos] = this.MISSED
               this.currentEvent.target.style.background = 'red'
@@ -513,10 +504,13 @@
 
           getValueOnPos: function (yPos, xPos) {
             let value = this.yourBoxes[yPos][xPos]
-            if (value instanceof Array) {
+            let field = document.getElementById("pos" + yPos + xPos)
+            if(value instanceof Array) {
               this.yourBoxes[yPos][xPos] = this.DESTROYED_SHIP
+              field.style.background = "blue"
             } else {
               this.yourBoxes[yPos][xPos] = this.MISSED
+              field.style.background = "orange"
             }
             var status = "Twój ruch"
             if(this.isHitAndSunk(value)){
