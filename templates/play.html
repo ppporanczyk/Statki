@@ -215,10 +215,8 @@
               this.setShipsOnMap()
             })
 
-            this.myChannel.bind('client-is-ready', (boxes) => {
+            this.myChannel.bind('client-is-ready', (nothing) => {
               this.opponentReady = true;
-              this.enemyBoxes = boxes
-              console.log(this.enemyBoxes)
             })
 
             this.myChannel.bind('client-game-started', (message) => {
@@ -479,7 +477,7 @@
           confirmSetup: function (e) {
             if(this.pregame == true && this.numShip.every(el => el === 0) ) {
               if (this.opponentReady == false) {
-                this.otherPlayerChannel.trigger('client-is-ready', this.yourBoxes)
+                this.otherPlayerChannel.trigger('client-is-ready', "")
                 this.status = "Oczekiwanie na przeciwnika"
               } else {
                 this.startGame()
