@@ -235,8 +235,10 @@
             this.myChannel.bind('client-return-value', data => this.executePlayerAction(data))
 
             this.myChannel.bind('client-your-turn', () => {
-              this.turn = 1
-              this.status = "Twój ruch!"
+              if(this.gameResult == 0) {
+                this.turn = 1
+                this.status = "Twój ruch!"
+              }
             })
 
             this.myChannel.bind('client-ask-match', () => {
@@ -475,6 +477,9 @@
                 this.startGame()
                 this.otherPlayerChannel.trigger('client-game-started', "")
               }
+            }
+            else {
+              alert("Rozstaw wszystkie statki!")
             }
           },
 
