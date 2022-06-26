@@ -382,8 +382,9 @@
           },
 
           deleteShipMasted: function(shipID){
-            this.shipFleet[shipID[0]][shipID[1]]=this.STOCKED
+            this.shipFleet[shipID[0]][shipID[1]] = this.STOCKED
             this.numShip[shipID[0]] = this.numShip[shipID[0]]+1
+            this.$forceUpdate();
             for (var i = 0; i < 8; i++) {
               for (var j = 0; j < 8; j++) {
                 if (this.yourBoxes[i][j] == shipID) {
@@ -432,6 +433,7 @@
                     var shipID = this.getFirstAvailableShipID(clickedFields.length)
                     this.shipFleet[shipID[0]][shipID[1]]=this.SET
                     this.numShip[shipID[0]] = this.numShip[shipID[0]]-1
+                    this.$forceUpdate();
                     var color = "rgb(" + Math.floor(Math.random() * 170) + ",0,0)"
                     for (let i = 0; i < clickedFields.length; i++){
                       this.setShipOnBoard(clickedFields[i], shipID,color)
@@ -485,7 +487,7 @@
 
           startGame: function () {
             this.status = "Gra rozpoczęta";
-            this.pregame=false
+            this.pregame = false
           },
 
           // Checks to see if the play was a winning play CHECK IF IT IS WORKING
