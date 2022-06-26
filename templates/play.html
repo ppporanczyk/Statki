@@ -215,6 +215,10 @@
               this.setShipsOnMap()
             })
 
+            this.myChannel.bind('client-inform-points', (message) => {
+              this.setEnemyPoints(message['points'])
+            })
+
             this.myChannel.bind('client-is-ready', (nothing) => {
               this.opponentReady = true;
             })
@@ -318,7 +322,6 @@
             let xPos = data['xPos'];
             let value = data['value'];
             let status = data['status'];
-            this.enemyPoints = data['enemyPoints']
             if (value instanceof Array) {
               this.mainBoxes[yPos][xPos] = this.DESTROYED_SHIP
               this.currentEvent.target.style.background = 'green'
@@ -330,6 +333,9 @@
                 this.status = status + " Teraz ruch przeciwnika!"
                 this.otherPlayerChannel.trigger('client-your-turn', "")
               }
+              this.otherPlayerChannel.trigger('client-inform-points', {
+                "points": this.points,
+              })
             } else {
               this.mainBoxes[yPos][xPos] = this.MISSED
               this.currentEvent.target.style.background = 'red'
@@ -342,6 +348,10 @@
             let yPos = e.target.dataset.i
             let xPos = e.target.dataset.j
             this.newShipFields = [e]
+          },
+
+          setEnemyPoints: function(points) {
+            this.enemyPoints = points
           },
 
           buildNewShip: function(e) {
@@ -527,9 +537,7 @@
               "yPos": yPos,
               "xPos": xPos,
               "value": value,
-              "status": status,
-              "enemyPoints": this.points,
-
+              "status": status
             })
           },
 
