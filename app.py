@@ -194,16 +194,30 @@ def last_game_with(player_id):
 
 def points_from_last_game(player_id):
     points_query= Games.query.with_entities(Games.points).filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
-    points_list=points_query[0]
-    points=points_list[0]
+    if(len(points_query) >= 1):
+        points_list=points_query[0]
+        points=points_list[0]
+    else:
+        points = 0
+
     if points==0:
         points_query= Games.query.with_entities(Games.points).filter_by(player_2=player_id).order_by(Games.id.desc()).limit(1).all()
+        if(len(points_query) >= 1):
+            points_list=points_query[0]
+            points=points_list[0]
+        else:
+            return "N/A"
         points_list=points_query[0]
         points=points_list[0]
     return points
 
 def status_game(player_id):
     status_query= Games.query.with_entities(Games.status).filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
+    if(len(status_query) >= 1):
+            status_list=status_query[0]
+            status=status_list[0]
+    else:
+        return "N/A"
     status_list=status_query[0]
     status=status_list[0]
     str=''
