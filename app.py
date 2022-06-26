@@ -14,6 +14,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from pusher import pusher
 from enum import Enum
+from collections import Counter
 
 SECRET_KEY = os.urandom(32)
 # FROM_DOMAIN = "statki.pythonanywhere.com"
@@ -182,15 +183,27 @@ def get_games_won_for_player_number(player_id):
         Games.query.filter_by(player_2=player_id, result=2).all())
 
 def last_game_with(player_id):
-    other_player= Games.query.filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
-    if(len(other_player) < 1):
+    other_player_p1 = Games.query.filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
+    other_player_p2 = Games.query.filter_by(player_2=player_id).order_by(Games.id.desc()).limit(1).all()
+    if(len(other_player_p1) >= 1 and len(other_player_p2) < 1):
+        other_player = other_player_p1[0]
+        other_player_id=other_player.player_2
+        return Users.query.get(other_player_id)
+    elif(len(other_player_p1) < 1 and len(other_player_p2) >= 1):
+        other_player = other_player_p2[0]
+        other_player_id=other_player.player_1
+        return Users.query.get(other_player_id)
+    elif(len(other_player_p1) >= 1 and len(other_player_p2) >= 1):
+        game_id_p1 = Games.query.order_by(Games.id.desc()).filter_by(player_1=player_id).all()[0].id
+        game_id_p2 = Games.query.order_by(Games.id.desc()).filter_by(player_2=player_id).all()[0].id
+        if(game_id_p1 > game_id_p2):
+            return Users.query.get(other_player_p1[0])
+        else:
+            return Users.query.get(other_player_p2[0])
+    else:
         class ob:
             name = "N/A"
         return ob()
-    else:
-        other_player = other_player[0]
-    other_player_id=other_player.player_2
-    return Users.query.get(other_player_id)
 
 def points_from_last_game(player_id):
     points_query= Games.query.with_entities(Games.points).filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
@@ -212,32 +225,80 @@ def points_from_last_game(player_id):
     return points
 
 def status_game(player_id):
-    status_query= Games.query.with_entities(Games.status).filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
-    if(len(status_query) >= 1):
-            status_list=status_query[0]
-            status=status_list[0]
-    else:
+    #status_query = Games.query.with_entities(Games.status).filter_by(player_1=player_id).order_by(Games.id.desc()).limit(1).all()
+    #status_query_p2 = Games.query.with_entities(Games.status).filter_by(player_2=player_id).order_by(Games.id.desc()).limit(1).all()
+
+    game_id_p1 = Games.query.order_by(Games.id.desc()).filter_by(player_1=player_id).all()
+    game_id_p2 = Games.query.order_by(Games.id.desc()).filter_by(player_2=player_id).all()
+
+    print("debug: status_game")
+
+    print(game_id_p1)
+    print(game_id_p2)
+
+    if(len(game_id_p1) == 0 and len(game_id_p2) == 0):
+        print("debug: Brak moich gier")
         return "N/A"
-    status_list=status_query[0]
-    status=status_list[0]
-    str=''
-    if status==1:
-        str='Wygrana'
+
+    def ret_status(result):
+        if result==1:
+            return 'Wygrana'
+        else:
+            return 'Przegrana'
+
+    if(len(game_id_p2) == 0 and len(game_id_p1) > 0):
+        # print("debug: ostatnia gra z mojej perspektywy")
+        result = game_id_p1[0].result
+        print(result)
+        return ret_status(result)
+    
+    if(len(game_id_p1) == 0 and len(game_id_p2) > 0):
+        # print("debug: ostatnia gra z perspektywy przeciwnika")
+        result = game_id_p2[0].result
+        print(result)
+        return ret_status(result-1)
+
+    if(game_id_p1[0].id > game_id_p2[0].id):
+        return ret_status(game_id_p1[0].result)
     else:
-        str='Przegrana'
-    return str
+        return ret_status(game_id_p2[0].result)
+
 
 def last_game_numbers(player_id):
-    last_orders = db.session.query(Games.player_2,
-                                   db.func.count(Games.player_2).label('mycount')).filter_by(player_1=player_id).group_by(Games.player_2).order_by('mycount').limit(1).all() #.subquery()
-    print(last_orders)
-    if(len(last_orders) < 1):
+    # last_orders = db.session.query(Games.player_2, db.func.count(Games.player_2).label('mycount')).filter_by(player_1=player_id).group_by(Games.player_2).order_by('mycount').limit(1).all() #.subquery()
+
+    players_p1 = Games.query.filter_by(player_1=player_id).all()
+    players_p2 = Games.query.filter_by(player_2=player_id).all()
+
+
+    print(player_id)
+    print(players_p1)
+    print(players_p2)
+    print("==")
+
+    players_p1 = [x.player_2 for x in players_p1]
+    players_p2 = [x.player_1 for x in players_p2]
+
+    players = players_p1 + players_p2
+
+    print(players_p1)
+    print(players_p2)
+    print(players)
+    print("===")
+
+    if(len(players) < 1):
         class ob:
             name = "N/A"
         return ob()
-    else:
-        last_orders = last_orders[0]
-    return Users.query.get(last_orders.player_2)
+
+    c = Counter(players)
+
+    most_common = max(c.values())
+    most_common_player_id = [item for item, count in c.items() if count == most_common][0]
+
+    # print("end last_game_numbers")
+
+    return Users.query.filter_by(id=most_common_player_id).all()[0]
 
 def get_games_won_for_players():
     arr=[]
