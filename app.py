@@ -18,20 +18,20 @@ from collections import Counter
 
 SECRET_KEY = os.urandom(32)
 # FROM_DOMAIN = "statki.pythonanywhere.com"
-# TO_DOMAIN = "149.156.43.57/p23"
+# TO_DOMAIN = ""
 
 app = Flask(__name__)
 
 pusher = pusher_client = pusher.Pusher(
-    app_id='1410664',
-    key='4d2726b6eaed69e2834f',
-    secret='3ca2a9d952ba6921320b',
+    app_id='',
+    key='',
+    secret='',
     cluster='eu',
     ssl=True
 )
 name = ''
 app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'postgresql://qbhjnrrwqvchoi:a12038c8f5d69267b00001db8cd0762c79458d0ec0cf8399467df7e04d1d8d50@ec2-34-242-8-97.eu-west-1.compute.amazonaws.com:5432/d9qk23pnab16ud'
+    'SQLALCHEMY_DATABASE_URI'] = ''
 
 # app.config[
 #     'SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres:1234@localhost:5432/postgres'
@@ -44,8 +44,8 @@ CORS(app)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = "shipgamesender@gmail.com"
-app.config['MAIL_PASSWORD'] = "sjripnmdztjsrvoc"
+app.config['MAIL_USERNAME'] = ""
+app.config['MAIL_PASSWORD'] = ""
 mail = Mail(app)
 
 db = SQLAlchemy(app)
